@@ -1,3 +1,22 @@
+# CI - the guards, on every push
+
+This is the GitHub Actions workflow for this repo, committed here rather than at
+`.github/workflows/guards.yml` because the token that published the repo is a
+fine-grained PAT **without the `workflow` scope**, and GitHub refuses to let
+such a token create or update a file under `.github/workflows/`.
+
+**To turn it on, copy this file to `.github/workflows/guards.yml`** and push. It
+runs the three guard files, runs the demo, and fails the build on a
+secret-shaped string.
+
+Until then, the guards run locally with one command:
+
+```bash
+npm test
+```
+
+---
+
 name: guards
 
 on:
