@@ -240,7 +240,7 @@ the plan.
 **Built, tested and in this repository:** the plan schema and validator, the
 tool-calling loop with rejection-and-recovery, the no-fakes guard, the claim
 scanner, the three-agent flow (planner, writer, reviewer), the web app, the cost
-calculator, 405 assertions across eleven test files, two runnable demos, and the
+calculator, 423 assertions across eleven test files, two runnable demos, and the
 committed transcript.
 
 **In the live product** ([justnewme.com](https://justnewme.com)): the
@@ -260,7 +260,7 @@ rows already are.
 ```bash
 git clone https://github.com/Therealratoshen/CreatorGuard-AI.git
 cd CreatorGuard-AI
-npm test             # 343 assertions
+npm test             # 423 assertions
 npm run demo         # the core loop: the rejection, the recovery, the guard
 npm run demo:agents  # the three-agent flow: planner, writer, reviewer
 npm start            # the web app, no API key needed

@@ -19,6 +19,7 @@
 
 import type { CampaignPlan } from "../agent/campaign-plan.ts";
 import type { CampaignStrategy } from "../agent/strategy.ts";
+import type { BrandDataset } from "../agent/dataset.ts";
 import type { RunEvent, RunResult, StageRecord } from "../agent/orchestrator.ts";
 import type { ModelMode } from "./model.ts";
 import { SYNTHETIC_NOTICE } from "./data.ts";
@@ -78,6 +79,45 @@ const STYLE = `
   th { color: var(--muted); font-weight: 600; font-size: .78rem; text-transform: uppercase;
        letter-spacing: .05em; }
   tr:last-child td { border-bottom: 0; }
+  /**
+   * A table wider than the phone it is on.
+   *
+   * width:100% does not stop a cell from being wider than its share: with five
+   * columns and a paragraph in the last one, the cells push past the table box
+   * and the whole document scrolls sideways. On a 500px viewport that put 19
+   * elements past the right edge and cut the rejection reasons - the reason
+   * this page exists - off the screen.
+   *
+   * So every table gets a scroll container. The page stops scrolling sideways
+   * and the table scrolls inside its own panel instead.
+   */
+  .scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .scroll table { min-width: 26rem; }
+  /**
+   * Below a phone's width, the five-column agents table stops being a table.
+   *
+   * Scrolling it sideways technically keeps the text reachable, but the "why"
+   * column is where the rejection reasons live - the whole point of the page -
+   * and asking someone to swipe a panel to read the sentence they came for is
+   * not good enough. Each row becomes a labelled block instead.
+   */
+  @media (max-width: 34rem) {
+    .stack thead { display: none; }
+    .stack, .stack tbody, .stack tr, .stack td { display: block; width: auto; }
+    .stack tr { border-bottom: 1px solid var(--line); padding: .6rem 0; }
+    .stack tr:last-child { border-bottom: 0; }
+    .stack td { border: 0; padding: .12rem .1rem; }
+    .stack td[data-label]::before {
+      content: attr(data-label) ": "; color: var(--muted); font-size: .7rem;
+      text-transform: uppercase; letter-spacing: .06em;
+      display: inline-block; min-width: 7rem;
+    }
+    .stack td[data-label="why"]::before { display: block; margin-top: .35rem; min-width: 0; }
+    /* A stage that passed with nothing to explain should not print an empty
+       "why" heading over blank space. */
+    .stack td[data-label="why"]:empty { display: none; }
+    .scroll .stack { min-width: 0; }
+  }
   .pill { display: inline-block; font-size: .75rem; padding: .1rem .45rem; border-radius: 999px;
           border: 1px solid var(--line); color: var(--muted); }
   .ok { color: var(--ok); } .block { color: var(--block); } .warn { color: var(--warn); }
@@ -119,7 +159,22 @@ function escapeHtml(s: string): string {
     .replace(/'/g, "&#39;");
 }
 
-function shell(title: string, body: string, head = ""): string {
+/**
+ * The document shell.
+ *
+ * The script goes at the END of the body, not in the head.
+ *
+ * It used to be interpolated into `<head>`, which meant it ran before the form
+ * existed: `document.getElementById('f')` returned null, `addEventListener`
+ * threw, and the submit handler was never attached. The button then fell back
+ * to a native form submission - a GET to the same URL with the fields in the
+ * query string - which reloads the page and starts nothing.
+ *
+ * No test caught it because every test drove `/api/runs` with `fetch` and never
+ * clicked the button. The journey a person actually takes was the one path
+ * nothing exercised.
+ */
+function shell(title: string, body: string, script = ""): string {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -127,16 +182,42 @@ function shell(title: string, body: string, head = ""): string {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(title)}</title>
 <style>${STYLE}</style>
-${head}
 </head>
 <body><main>
 ${body}
-</main></body></html>`;
+</main>
+${script}
+</body></html>`;
 }
 
+/**
+ * The model mode, as a badge plus the detail behind it.
+ *
+ * The pill already says "scripted model", and the label from `chooseModel` is
+ * "scripted model (no BASETEN_API_KEY set)" - printing both read
+ * "scripted model scripted model (no BASETEN_API_KEY set)". The label's job is
+ * the *reason*, so the part the pill already said is dropped.
+ */
 function modeBadge(mode: ModelMode, label: string): string {
   const cls = mode === "live" ? "ok" : "warn";
-  return `<span class="pill ${cls}">${escapeHtml(mode)} model</span> <span class="meta">${escapeHtml(label)}</span>`;
+  const detail = label.replace(/^(scripted|live)\s+model\s*/i, "").trim();
+  return `<span class="pill ${cls}">${escapeHtml(mode)} model</span>${
+    detail ? ` <span class="meta">${escapeHtml(detail)}</span>` : ""
+  }`;
+}
+
+/**
+ * The next Monday, as YYYY-MM-DD.
+ *
+ * The form used to ship a hardcoded `2026-11-02`. A default date that is right
+ * only during one week is a bug that waits: open the app later and it asks the
+ * planner for a week that has already happened.
+ */
+function nextMonday(now = new Date()): string {
+  const d = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const day = d.getUTCDay(); // 0 = Sunday
+  d.setUTCDate(d.getUTCDate() + (day === 1 ? 0 : (8 - day) % 7));
+  return d.toISOString().slice(0, 10);
 }
 
 /** The index: the form, and the runs already made in this process. */
@@ -145,17 +226,19 @@ export function renderIndex(runs: RunView[]): string {
     runs.length === 0
       ? `<p class="meta">No runs yet in this process. Runs are kept in memory and disappear on restart.</p>`
       : `<ul>${runs
-          .map(
-            (r) =>
-              `<li><a href="/runs/${escapeHtml(r.id)}">${escapeHtml(r.brief.slice(0, 60) || "(no brief)")}</a>
+          .map((r) => {
+            // Truncated without an ellipsis, a long brief looks like it ends
+            // mid-word rather than like it was cut.
+            const short = r.brief.length > 60 ? `${r.brief.slice(0, 60).trimEnd()}…` : r.brief;
+            return `<li><a href="/runs/${escapeHtml(r.id)}">${escapeHtml(short || "(no brief)")}</a>
                <span class="meta"> — week of ${escapeHtml(r.weekOf)}, ${
                  r.status === "done"
                    ? r.result?.ok
                      ? `<span class="ok">approved</span>`
                      : `<span class="block">not published</span>`
                    : "running"
-               }</span></li>`,
-          )
+               }</span></li>`;
+          })
           .join("")}</ul>`;
 
   return shell(
@@ -171,11 +254,11 @@ guard that will not let a number through without a row behind it.</p>
   <form id="f">
     <div class="field" style="flex:1 1 100%">
       <label for="brief">What does the brand want this week?</label>
-      <textarea id="brief" name="brief">launch the serum, and show it fitting into a routine people already have</textarea>
+      <textarea id="brief" name="brief" required maxlength="2000">launch the serum, and show it fitting into a routine people already have</textarea>
     </div>
     <div class="field">
       <label for="weekOf">The Monday the plan starts</label>
-      <input id="weekOf" name="weekOf" value="2026-11-02">
+      <input id="weekOf" name="weekOf" type="date" value="${nextMonday()}" required>
     </div>
     <div class="field" style="flex:0 0 auto">
       <button id="go" type="submit">Run the three agents</button>
@@ -185,6 +268,7 @@ guard that will not let a number through without a row behind it.</p>
     No API key needed. Without <code>BASETEN_API_KEY</code> the agents run against a scripted
     model that makes the mistakes a real one makes, so the guards have something to catch.
   </p>
+  <p class="meta err" id="formError" role="alert" hidden style="margin-bottom:0"></p>
 </div>
 
 <h2>Runs</h2>
@@ -192,19 +276,30 @@ guard that will not let a number through without a row behind it.</p>
 `,
     `<script>
       const f = document.getElementById('f');
+      const box = document.getElementById('formError');
+      const fail = (msg) => { box.textContent = msg; box.hidden = false; };
+
       f.addEventListener('submit', async (e) => {
         e.preventDefault();
+        box.hidden = true;
         const go = document.getElementById('go');
+        const weekOf = document.getElementById('weekOf').value;
+        const brief = document.getElementById('brief').value;
+
+        // The server owns this rule; checking it here too just means the brand
+        // finds out before the round trip instead of after it.
+        if (!brief.trim()) return fail('Say what the brand wants this week - the plan is built from it.');
+        if (weekOf && new Date(weekOf + 'T00:00:00Z').getUTCDay() !== 1) {
+          return fail('Pick a Monday. The week the plan covers starts on one.');
+        }
+
         go.disabled = true;
         go.textContent = 'Starting…';
         try {
           const res = await fetch('/api/runs', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              brief: document.getElementById('brief').value,
-              weekOf: document.getElementById('weekOf').value,
-            }),
+            body: JSON.stringify({ brief, weekOf }),
           });
           const data = await res.json();
           if (!res.ok) throw new Error(data.error || 'could not start the run');
@@ -212,7 +307,7 @@ guard that will not let a number through without a row behind it.</p>
         } catch (err) {
           go.disabled = false;
           go.textContent = 'Run the three agents';
-          document.getElementById('hint').textContent = String(err.message || err);
+          fail(String(err.message || err));
         }
       });
     </script>`,
@@ -235,12 +330,21 @@ function stageRows(stages: StageRecord[]): string {
         .map((e) => `<div class="rej">↺ rejected, then corrected: ${escapeHtml(e)}</div>`)
         .join("");
       const warns = s.warnings.map((w) => `<div class="wrn">! ${escapeHtml(w)}</div>`).join("");
+      /**
+       * `data-label` is the column heading, repeated on the cell.
+       *
+       * On a narrow screen this table stops being a table and becomes one block
+       * per stage (see the `.stack` rules). The heading has to travel with the
+       * value, or a stacked cell reads as an unlabelled paragraph. It also
+       * keeps the label available to a screen reader once the `thead` is
+       * hidden.
+       */
       return `<tr>
-        <td class="mono">${escapeHtml(s.stage)}</td>
-        <td>${s.attempt}</td>
-        <td>${status}</td>
-        <td>${s.modelCalls}</td>
-        <td>${errors}${rej}${warns}${
+        <td class="mono" data-label="agent">${escapeHtml(s.stage)}</td>
+        <td data-label="attempt">${s.attempt}</td>
+        <td data-label="outcome">${status}</td>
+        <td data-label="model calls">${s.modelCalls}</td>
+        <td data-label="why">${errors}${rej}${warns}${
           !s.ok && s.errors.length === 0 ? `<div class="err">no reason recorded</div>` : ""
         }</td>
       </tr>`;
@@ -248,11 +352,32 @@ function stageRows(stages: StageRecord[]): string {
     .join("");
 }
 
-function planHtml(plan: CampaignPlan, strategy?: CampaignStrategy): string {
+/**
+ * How a creator is named on the page.
+ *
+ * `kol_citra` is a database key. The brand knows the person as `@citra.kulit`,
+ * and the handle was in the dataset the whole time. Both are shown - the handle
+ * because that is who it is, the id because that is what the plan validated
+ * against - but the handle leads.
+ */
+function creatorCell(creatorId: string, dataset?: BrandDataset): string {
+  const c = dataset?.creators.find((x) => x.creatorId === creatorId);
+  if (!c) return `<span class="mono">${escapeHtml(creatorId)}</span>`;
+  return `<span>${escapeHtml(c.handle)}</span><div class="meta mono">${escapeHtml(creatorId)}</div>`;
+}
+
+/** The human name for a metric, from the row that holds it. */
+function metricCell(metric: string, sourceRowId: string, dataset?: BrandDataset): string {
+  const row = dataset?.rows.find((r) => r.rowId === sourceRowId);
+  if (!row?.label) return `<span class="mono">${escapeHtml(metric)}</span>`;
+  return `<span>${escapeHtml(row.label)}</span><div class="meta mono">${escapeHtml(metric)}</div>`;
+}
+
+function planHtml(plan: CampaignPlan, strategy?: CampaignStrategy, dataset?: BrandDataset): string {
   const briefs = plan.contentBriefs
     .map(
       (b) => `<div class="brief">
-        <div class="meta">${escapeHtml(b.creatorId)} · ${b.imageCount} image(s)</div>
+        <div class="meta">${creatorCell(b.creatorId, dataset)} · ${b.imageCount} image(s)</div>
         <div class="hook">“${escapeHtml(b.hook)}”</div>
         <p class="meta" style="margin:.2rem 0"><strong>Objective</strong> ${escapeHtml(b.objective)}</p>
         <p class="meta" style="margin:.2rem 0"><strong>Call to action</strong> ${escapeHtml(b.cta)}</p>
@@ -263,7 +388,7 @@ function planHtml(plan: CampaignPlan, strategy?: CampaignStrategy): string {
   const shortlist = plan.creatorShortlist
     .map(
       (c) => `<tr>
-        <td class="mono">${escapeHtml(c.creatorId)}</td>
+        <td>${creatorCell(c.creatorId, dataset)}</td>
         <td>${escapeHtml(c.reason)}</td>
         <td class="mono">${c.justifyingMetric}</td>
       </tr>`,
@@ -273,7 +398,7 @@ function planHtml(plan: CampaignPlan, strategy?: CampaignStrategy): string {
   const cited = plan.citedMetrics
     .map(
       (m) => `<tr>
-        <td class="mono">${escapeHtml(m.metric)}</td>
+        <td>${metricCell(m.metric, m.sourceRowId, dataset)}</td>
         <td class="mono">${m.value}</td>
         <td class="mono">${escapeHtml(m.sourceRowId)}</td>
       </tr>`,
@@ -301,14 +426,14 @@ function planHtml(plan: CampaignPlan, strategy?: CampaignStrategy): string {
 
 <div class="panel">
   <h3 style="margin-top:0">The shortlist, and the number behind each pick</h3>
-  <table><thead><tr><th>creator</th><th>why</th><th>number</th></tr></thead>
-  <tbody>${shortlist}</tbody></table>
+  <div class="scroll"><table><thead><tr><th>creator</th><th>why</th><th>number</th></tr></thead>
+  <tbody>${shortlist}</tbody></table></div>
 </div>
 
 <div class="panel">
   <h3 style="margin-top:0">Every number, and the row it came from</h3>
-  <table><thead><tr><th>metric</th><th>value</th><th>source row</th></tr></thead>
-  <tbody>${cited}</tbody></table>
+  <div class="scroll"><table><thead><tr><th>metric</th><th>value</th><th>source row</th></tr></thead>
+  <tbody>${cited}</tbody></table></div>
   <p class="meta" style="margin-bottom:0">A plan that cites a row which does not exist, or a value
   that disagrees with the row, is rejected before it reaches this page.</p>
 </div>
@@ -320,20 +445,35 @@ function planHtml(plan: CampaignPlan, strategy?: CampaignStrategy): string {
 }
 
 /** The finished run: the plan, or a full statement of why there isn't one. */
-export function renderRun(run: RunView): string {
+export function renderRun(run: RunView, dataset?: BrandDataset): string {
   const r = run.result;
   const header = `
 <h1>${r?.ok ? "A campaign plan" : "No plan was published"}</h1>
 <p class="sub">week of ${escapeHtml(run.weekOf)} · ${modeBadge(run.mode, run.modelLabel)}</p>
-<div class="notice">${escapeHtml(SYNTHETIC_NOTICE)}</div>`;
+<div class="notice">${escapeHtml(SYNTHETIC_NOTICE)}</div>
+<div class="panel">
+  <h3 style="margin-top:0">What the brand asked for</h3>
+  <p style="margin-bottom:0">${
+    run.brief ? escapeHtml(run.brief) : `<span class="meta">No brief was given.</span>`
+  }</p>
+</div>`;
 
   if (!r) {
     return shell("CreatorGuard AI — running", header + `<div class="panel">The run has no result yet.</div>`);
   }
 
+  /**
+   * The reason, minus the part the heading already says.
+   *
+   * A successful run's reason is the literal string "approved", so the panel
+   * read "Approved. approved". A failed run's reason is a full sentence and is
+   * the most useful thing on the page, so it is kept.
+   */
+  const reason = /^approved$/i.test(r.reason ?? "") ? "" : escapeHtml(r.reason ?? "");
+
   const outcome = r.ok
     ? `<div class="panel"><p style="margin:0"><span class="ok"><strong>Approved.</strong></span>
-         ${escapeHtml(r.reason ?? "")}</p>
+         ${reason}</p>
          ${
            r.degraded
              ? `<p class="wrn" style="margin-bottom:0">The judgement pass did not complete, so no
@@ -353,12 +493,20 @@ export function renderRun(run: RunView): string {
          <div class="panel">${r.warnings.map((w) => `<div class="wrn">! ${escapeHtml(w)}</div>`).join("")}</div>`
       : "";
 
-  const strategyBlock = r.strategy
-    ? `<div class="panel">
+  /**
+   * The strategy, shown on its own only when there is no plan to carry it.
+   *
+   * `planHtml` already prints the angle and the constraints, so rendering this
+   * underneath a successful plan repeated both. After a failure it is the only
+   * record of what the planner decided, and it stays.
+   */
+  const strategyBlock =
+    r.strategy && !r.plan
+      ? `<div class="panel">
          <h3 style="margin-top:0">The planner's strategy</h3>
          <p class="meta" style="margin:0">${escapeHtml(r.strategy.angle)}</p>
        </div>`
-    : "";
+      : "";
 
   return shell(
     r.ok ? "CreatorGuard AI — the plan" : "CreatorGuard AI — not published",
@@ -366,12 +514,12 @@ export function renderRun(run: RunView): string {
      ${outcome}
      <h2>What each agent did</h2>
      <div class="panel">
-       <table>
+       <div class="scroll"><table class="stack">
          <thead><tr><th>agent</th><th>attempt</th><th>outcome</th><th>model calls</th><th>why</th></tr></thead>
          <tbody>${stageRows(r.stages)}</tbody>
-       </table>
+       </table></div>
      </div>
-     ${r.plan ? `<h2>The plan</h2>${planHtml(r.plan, r.strategy)}` : ""}
+     ${r.plan ? `<h2>The plan</h2>${planHtml(r.plan, r.strategy, dataset)}` : ""}
      ${warnings}
      ${strategyBlock}
      <p class="meta" style="margin-top:2.5rem"><a href="/">Run another week</a></p>`,
@@ -395,14 +543,27 @@ export function renderRunning(run: RunView): string {
 <div class="notice">${escapeHtml(SYNTHETIC_NOTICE)}</div>
 <div class="panel">
   <h3 style="margin-top:0">The agents</h3>
-  <pre class="log" id="log"></pre>
+  <pre class="log" id="log" aria-live="polite">  connecting to the run…</pre>
 </div>
 <p class="meta" id="note">The page reloads when the run finishes.</p>
 `,
     `<script>
       const log = document.getElementById('log');
       const note = document.getElementById('note');
-      const add = (line) => { log.textContent += line + "\\n"; log.scrollTop = log.scrollHeight; };
+      /**
+       * The log is never empty.
+       *
+       * It used to render as a blank dark bar until the first event arrived -
+       * indistinguishable from a broken page, and the run can take a while to
+       * produce that first event. The placeholder is cleared by the first real
+       * line, so it cannot be mistaken for output.
+       */
+      let placeholder = true;
+      const add = (line) => {
+        if (placeholder) { log.textContent = ''; placeholder = false; }
+        log.textContent += line + "\\n";
+        log.scrollTop = log.scrollHeight;
+      };
       const es = new EventSource('/api/runs/${encodeURIComponent(run.id)}/events');
       es.onmessage = (e) => {
         let ev;

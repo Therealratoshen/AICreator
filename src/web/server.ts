@@ -63,15 +63,26 @@ function json(res: ServerResponse, status: number, value: unknown): void {
 }
 
 /** A 404 that looks like the rest of the app instead of like a crash. */
-function notFoundPage(message: string): string {
+function notFoundPage(
+  message: string,
+  hint = "Runs are kept in memory, so restarting the server forgets them.",
+): string {
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Not found</title>
-<style>body{font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
-max-width:36rem;margin:4rem auto;padding:0 1.25rem;color:#1c1b19;background:#fbfaf8}
-a{color:#1f5f4f}p{color:#6b6862}</style></head><body>
+<style>
+  body{font:16px/1.6 ui-sans-serif,-apple-system,"Segoe UI",Roboto,sans-serif;
+       max-width:36rem;margin:4rem auto;padding:0 1.25rem;color:#1c1b19;background:#fbfaf8}
+  a{color:#1f5f4f}p{color:#6b6862}
+  /* The rest of the app follows the system theme; this page used to stay
+     white, so a dark-mode reader got a flash of light on every 404. */
+  @media (prefers-color-scheme: dark){
+    body{color:#ecece8;background:#16171a}
+    a{color:#6fbfa4}p{color:#9a9a94}
+  }
+</style></head><body>
 <h1 style="font-size:1.3rem">${message.replace(/[<>&"]/g, "")}</h1>
-<p>Runs are kept in memory, so restarting the server forgets them.</p>
+<p>${hint.replace(/[<>&"]/g, "")}</p>
 <p><a href="/">Start a run</a></p></body></html>`;
 }
 
@@ -184,6 +195,19 @@ const server = createServer(async (req, res) => {  const url = new URL(req.url ?
       if (typeof brief === "string" && brief.length > MAX_BRIEF) {
         return json(res, 400, { error: `brief must be under ${MAX_BRIEF} characters` });
       }
+      /**
+       * A brief is the input, not an optional extra.
+       *
+       * This used to accept an empty one and run anyway, which produced a
+       * confident "Approved." plan for a brand who had asked for nothing - and
+       * a row in the index reading "(no brief)" that could not be told apart
+       * from the next one. If there is no ask, there is nothing to plan.
+       */
+      if (typeof brief !== "string" || brief.trim().length === 0) {
+        return json(res, 400, {
+          error: "brief is required - the plan is built from what the brand asks for",
+        });
+      }
 
       const choice = chooseModel(SEREH);
       const run: RunView = {
@@ -209,7 +233,7 @@ const server = createServer(async (req, res) => {  const url = new URL(req.url ?
     if (req.method === "GET" && pageMatch) {
       const run = runs.get(pageMatch[1]!);
       if (!run) return send(res, 404, "text/html; charset=utf-8", notFoundPage("No such run"));
-      const html = run.status === "done" ? renderRun(run) : renderRunning(run);
+      const html = run.status === "done" ? renderRun(run, SEREH) : renderRunning(run);
       return send(res, 200, "text/html; charset=utf-8", html);
     }
 
@@ -270,7 +294,12 @@ const server = createServer(async (req, res) => {  const url = new URL(req.url ?
     }
 
     // ---------------------------------------------------------------- 404
-    return send(res, 404, "text/html; charset=utf-8", notFoundPage(`No route for ${path}`));
+    return send(
+      res,
+      404,
+      "text/html; charset=utf-8",
+      notFoundPage(`No route for ${path}`, "That address is not one of this app's routes."),
+    );
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     if (!res.headersSent) return json(res, 500, { error: message });

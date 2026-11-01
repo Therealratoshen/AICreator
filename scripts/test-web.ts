@@ -23,6 +23,7 @@ import type { AddressInfo } from "node:net";
 import { server } from "../src/web/server.ts";
 import { SEREH } from "../src/web/data.ts";
 import { scriptedClient, chooseModel } from "../src/web/model.ts";
+import { renderRunning, type RunView } from "../src/web/render.ts";
 import { runCampaign } from "../src/agent/orchestrator.ts";
 import { checkNoFakes } from "../src/agent/no-fakes.ts";
 import { rowsToMap } from "../src/agent/dataset.ts";
@@ -147,6 +148,42 @@ try {
   check("the index carries the synthetic notice", indexHtml.includes("Synthetic data"));
   check("the index offers the form", indexHtml.includes("Run the three agents"));
 
+  /**
+   * The script must come after the markup it touches.
+   *
+   * It used to be injected into `<head>`, so it ran before the form existed,
+   * `getElementById('f')` returned null, and the submit handler was never
+   * attached. Clicking the button then did a native GET submit and started
+   * nothing. Every other assertion here passed, because they all call
+   * `/api/runs` directly and never press the button.
+   */
+  check(
+    "the index's script comes after the form it wires up",
+    indexHtml.indexOf("<script>") > indexHtml.indexOf('<form id="f">'),
+    `script at ${indexHtml.indexOf("<script>")}, form at ${indexHtml.indexOf('<form id="f">')}`,
+  );
+  {
+    const running: RunView = {
+      id: "00000000-0000-4000-8000-000000000000",
+      brief: "x",
+      weekOf: "2026-11-02",
+      status: "running",
+      mode: "scripted",
+      modelLabel: "scripted model (no BASETEN_API_KEY set)",
+      events: [],
+      startedAt: 0,
+    };
+    const runningHtml = renderRunning(running);
+    check(
+      "the progress page's script comes after the log it appends to",
+      runningHtml.indexOf("<script>") > runningHtml.indexOf('id="log"'),
+    );
+    check(
+      "the progress log starts with something to read, not a blank box",
+      /id="log"[^>]*>[^<]+</.test(runningHtml),
+    );
+  }
+
   const bad = await fetch(`${base}/api/runs`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -159,6 +196,27 @@ try {
     String(badBody.error).includes("Monday"),
     JSON.stringify(badBody),
   );
+
+  // A brief is the input. An empty one used to produce a confident "approved"
+  // plan for a brand who asked for nothing.
+  for (const [name, body] of [
+    ["an empty brief", { brief: "", weekOf: "2026-11-02" }],
+    ["a whitespace-only brief", { brief: "   \n  ", weekOf: "2026-11-02" }],
+    ["a missing brief", { weekOf: "2026-11-02" }],
+  ] as const) {
+    const res = await fetch(`${base}/api/runs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const payload = (await res.json()) as { error?: string };
+    check(`${name} is refused with 400`, res.status === 400, String(res.status));
+    check(
+      `${name} is told why`,
+      String(payload.error).includes("brief"),
+      JSON.stringify(payload),
+    );
+  }
 
   const created = await fetch(`${base}/api/runs`, {
     method: "POST",
@@ -207,6 +265,54 @@ try {
     SEREH.rows.some((r) => pageHtml.includes(r.rowId)),
   );
   check("no undefined leaked into the HTML", !pageHtml.includes("undefined"));
+
+  // ---------------------------------------------------------------- the journey
+  // What the page must show a brand, and the ways it used to get in the way.
+  check(
+    "the page echoes the brief the run was given",
+    pageHtml.includes("What the brand asked for") && pageHtml.includes("launch the serum"),
+  );
+  check(
+    "a creator is named by their handle, not only the database key",
+    pageHtml.includes("@citra.kulit") && pageHtml.includes("kol_citra"),
+  );
+  check(
+    "a metric is named in words, with the machine name kept alongside",
+    pageHtml.includes("median saves per post, 90 days") || pageHtml.includes("saves across all posts, 90 days"),
+  );
+  check(
+    "the model label is not printed twice",
+    !pageHtml.includes("scripted model scripted model"),
+  );
+  check(
+    "the approval sentence is not doubled",
+    !/Approved\.\s*approved/i.test(pageHtml),
+  );
+  check(
+    "every table sits in a horizontal scroll container",
+    (pageHtml.match(/<table\b/g) ?? []).length === (pageHtml.match(/class="scroll"/g) ?? []).length,
+    `${(pageHtml.match(/<table\b/g) ?? []).length} tables, ${(pageHtml.match(/class="scroll"/g) ?? []).length} wrappers`,
+  );
+  check(
+    "the agents table carries a heading on every cell, for the stacked layout",
+    ["agent", "attempt", "outcome", "model calls", "why"].every((h) =>
+      pageHtml.includes(`data-label="${h}"`),
+    ),
+  );
+
+  const indexAgain = await fetch(`${base}/`);
+  const indexAgainHtml = await indexAgain.text();
+  const weekValue = /id="weekOf"[^>]*value="([^"]+)"/.exec(indexAgainHtml)?.[1] ?? "";
+  check(
+    "the form defaults to a real Monday, not a hardcoded week",
+    /^\d{4}-\d{2}-\d{2}$/.test(weekValue) &&
+      new Date(`${weekValue}T00:00:00Z`).getUTCDay() === 1,
+    weekValue,
+  );
+  check(
+    "the brief field is required and bounded",
+    /id="brief"[^>]*required/.test(indexAgainHtml) && /maxlength="2000"/.test(indexAgainHtml),
+  );
 
   const missing = await fetch(`${base}/runs/00000000-0000-4000-8000-000000000000`);
   check("an unknown run is a 404", missing.status === 404, String(missing.status));

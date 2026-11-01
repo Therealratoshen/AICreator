@@ -92,7 +92,7 @@ four gates before anything reads it.
 ## The commands
 
 ```bash
-npm test             # 405 assertions across 11 files. MUST pass before you commit.
+npm test             # 423 assertions across 11 files. MUST pass before you commit.
 npm run demo         # the original single-agent loop, with the transcript
 npm run demo:agents  # the three-agent pipeline: planner, writer, reviewer
 npm start            # the web app on http://127.0.0.1:3000
