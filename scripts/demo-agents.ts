@@ -17,7 +17,7 @@
  * production code in every run.
  */
 
-import { runCampaign, type RunEvent } from "../src/agent/orchestrator.ts";
+import { runCampaign, rejectionCount, type RunEvent } from "../src/agent/orchestrator.ts";
 import { checkNoFakes } from "../src/agent/no-fakes.ts";
 import { rowsToMap } from "../src/agent/dataset.ts";
 import { SEREH } from "../src/web/data.ts";
@@ -153,7 +153,7 @@ async function main() {
   }
 
   const calls = result.stages.reduce((n, s) => n + s.modelCalls, 0);
-  const rejected = result.stages.reduce((n, s) => n + s.rejections.length, 0);
+  const rejected = rejectionCount(result.stages);
   console.log(line());
   console.log(`  ${calls} model call(s), ${rejected} rejection(s), ${result.stages.length} stage(s).`);
   console.log("");

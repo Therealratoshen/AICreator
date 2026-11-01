@@ -15,7 +15,7 @@
  * Run: node --experimental-strip-types --no-warnings scripts/test-orchestrator.ts
  */
 
-import { runCampaign, MAX_REVISIONS, type RunEvent } from "../src/agent/orchestrator.ts";
+import { runCampaign, rejectionCount, MAX_REVISIONS, type RunEvent } from "../src/agent/orchestrator.ts";
 import type { ChatClient } from "../src/agent/copilot.ts";
 import type { BrandDataset } from "../src/agent/dataset.ts";
 
@@ -272,6 +272,7 @@ console.log("\n# 4. a rejected plan is revised, then approved");
     events.some((e) => e.type === "revision" && JSON.stringify(e).includes("ANGLE-DRIFT")),
   );
   check("a plan was returned", !!r.plan);
+  check("exactly one rejection is counted", rejectionCount(r.stages) === 1, String(rejectionCount(r.stages)));
 }
 
 // ---------------------------------------------------------------- 5. THE INVARIANT
@@ -295,6 +296,7 @@ console.log("\n# 5. a plan the reviewer keeps rejecting is NEVER published");
   check("the reason says it was not published", String(r.reason).includes("not published"), r.reason);
   check("the reason carries the last objection", String(r.reason).includes("ANGLE-DRIFT"), r.reason);
   check("the strategy is still reported for diagnosis", !!r.strategy);
+  check("both rejections are counted", rejectionCount(r.stages) === 2, String(rejectionCount(r.stages)));
 }
 
 // ---------------------------------------------------------------- 6. the default budget
@@ -351,6 +353,36 @@ console.log("\n# 8. a broken progress listener cannot break the run");
   });
   check("the run still succeeded", r.ok, r.reason);
   check("a plan still came back", !!r.plan);
+}
+
+// ---------------------------------------------------------------- 9. the count
+console.log("\n# 9. the rejection count matches what the run actually showed");
+{
+  // A stage that rejects a tool call and retries looks like one clean success
+  // from outside. The count has to include that rejection anyway, or the demo's
+  // summary line quietly disagrees with the output printed above it.
+  const { client } = makeClient(
+    base({
+      strategy: [{ ...STRATEGY_ARGS, cadencePerWeek: 0 }, STRATEGY_ARGS],
+    }),
+  );
+  const r = await runCampaign({ client, dataset: DATASET, brief: "x", weekOf: "2026-11-02" });
+
+  check("the run succeeded on the retry", r.ok, r.reason);
+  check(
+    "the planner's absorbed rejection is recorded",
+    (r.stages.find((s) => s.stage === "planner")?.rejections.length ?? 0) === 1,
+    JSON.stringify(r.stages.find((s) => s.stage === "planner")?.rejections),
+  );
+  check(
+    "an absorbed rejection counts even though the stage passed",
+    rejectionCount(r.stages) === 1,
+    String(rejectionCount(r.stages)),
+  );
+  check(
+    "a clean run counts zero",
+    rejectionCount([{ stage: "planner", attempt: 1, ok: true, errors: [], rejections: [], warnings: [], modelCalls: 1 }]) === 0,
+  );
 }
 
 console.log(`\n${failed === 0 ? "PASS" : "FAIL"} test-orchestrator — ${passed} passed, ${failed} failed`);

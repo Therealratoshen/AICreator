@@ -70,6 +70,27 @@ function rejectionsIn(transcript: readonly { action: string; errors?: string[] }
 }
 
 /**
+ * How many times something was rejected across a run.
+ *
+ * Two kinds, and they are counted differently on purpose:
+ *
+ *  - a stage's own loop rejected a tool call and retried — one entry in
+ *    `rejections` per rejected call;
+ *  - a stage returned a failing verdict and the run went round again — a stage
+ *    record that is not `ok` is exactly one rejection, on top of whatever its
+ *    loop absorbed internally.
+ *
+ * Summing `rejections` alone under-reports. The demo scenario shows three
+ * rejections on screen — two absorbed, one from the reviewer — and the first
+ * version of its summary line claimed two, because the reviewer's rejection is
+ * a verdict rather than a tool call. A count that disagrees with the output
+ * above it is worse than no count.
+ */
+export function rejectionCount(stages: readonly StageRecord[]): number {
+  return stages.reduce((n, s) => n + s.rejections.length + (s.ok ? 0 : 1), 0);
+}
+
+/**
  * Progress, for streaming.
  *
  * The web layer subscribes to this rather than polling the result, because a
