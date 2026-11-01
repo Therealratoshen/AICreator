@@ -1,7 +1,7 @@
 # CI - the guards, on every push
 #
-# This file is the workflow that runs on every push: the three guard files, the
-# demo, and a secret scan that fails the build.
+# This file is the workflow that runs on every push: every guard file, both
+# demos, and a secret scan that fails the build.
 #
 # A copy also lives at `ci/guards.yml`, which explains the setup. That note is
 # kept here as a comment so this file stays pure YAML - GitHub's parser reads
@@ -30,8 +30,13 @@ jobs:
 
       # THE NO-FAKES GATE: this repo's central promise is that no number is
       # published without a row behind it. The guard proves it on every push.
-      - name: the demo still runs
+      - name: the core loop still runs
         run: node --experimental-strip-types --no-warnings scripts/demo.ts
+
+      # The three-agent flow is the thing a reader tries second, so a push that
+      # breaks it should fail here rather than in someone's terminal.
+      - name: the three-agent flow still runs
+        run: node --experimental-strip-types --no-warnings scripts/demo-agents.ts
 
       # The secret scan. A public repo must not grow a secret.
       - name: no secrets

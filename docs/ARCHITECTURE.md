@@ -49,7 +49,86 @@
         the plan → Muse Image variants → WhatsApp / Messenger
 ```
 
-## The three layers, and why they are separate
+## The three agents
+
+The pipeline above is the *core*. On top of it sits one orchestrated flow with
+three agents, because deciding, writing and checking are three different jobs
+with three different failure modes — and one agent asked to do all three has no
+way to be told "the strategy is fine, the wording is not".
+
+```
+  ┌──────────────┐   CampaignStrategy   ┌──────────────┐
+  │   PLANNER    │ ───────────────────▶ │    WRITER    │
+  │              │  week · cadence ·    │              │
+  │ decides only │  creators · angle ·  │ writes only  │
+  │              │  constraints         │              │
+  └──────────────┘                      └──────┬───────┘
+                                               │ submit_campaign_plan
+                                               │ (the only plan exit)
+                                               ▼
+                                    ┌─────────────────────┐
+                                    │  4 gates, in code   │
+                                    │  validateCampaignPlan│
+                                    │  checkNoFakes        │
+                                    │  conformance         │
+                                    │  claim scan          │
+                                    └──────────┬──────────┘
+                                               │
+                                               ▼
+  ┌──────────────┐   findings          ┌──────────────┐
+  │   REVIEWER   │ ◀───────────────────│    PLAN      │
+  │ re-runs the  │                     └──────────────┘
+  │ code checks, │ ──── revise ───▶ WRITER   (at most 2 times)
+  │ then judges  │
+  └──────────────┘ ──── approve ───▶ a brand sees it
+```
+
+`src/agent/orchestrator.ts` is the only file that knows that order. When the
+revision budget runs out, the run returns `ok: false` and **no plan** — the
+same rule as the core, applied one level up.
+
+### Why the strategy exists
+
+A single agent asked for "a weekly plan" reasons and writes in one breath. When
+the result is rejected, the retry has nothing to hold on to except the error
+list, so it re-reasons from scratch — and the second attempt can contradict the
+first on decisions nobody complained about. In practice the model changes the
+cadence while fixing a date.
+
+Splitting the decision from the writing gives the reviewer something to check
+the plan *against*. A revision can then be told "keep the strategy, fix these
+fields", and a plan that silently changes the cadence is caught by
+`checkStrategyConformance` instead of being a judgement call.
+
+### Why the reviewer cannot talk the guard down
+
+The reviewer's verdict is computed in code:
+
+```ts
+blocked = anyDeterministicBlock || anyModelBlock
+```
+
+The model may **add** a finding. It may never **remove** one. So a model that
+reads a plan containing a fabricated statistic and reports "looks good" cannot
+approve it — the code finding is already in the list, and the verdict never
+consults the model for permission.
+
+### The four gates the writer passes
+
+| gate | question | what it catches |
+|---|---|---|
+| `validateCampaignPlan` | is this a plan at all? | shape, the Monday rule, rows that do not exist |
+| `checkNoFakes` | does each cited value match its row? | rounding, mixing up two similar rows |
+| `checkStrategyConformance` | did it keep the planner's decisions? | a changed week, cadence, shortlist or order |
+| `claims.ts` | is anything in the prose unbacked? | a statistic in a hook, a guarantee, a cure claim |
+
+The fourth one is the one that was missing from the core, and it is the
+subtle one: `checkNoFakes` reads `citedMetrics` and never the sentences, so a
+plan could cite one real row and state a different number in the copy.
+
+---
+
+## The three layers of the core, and why they are separate
 
 | layer | file | the job |
 |---|---|---|
