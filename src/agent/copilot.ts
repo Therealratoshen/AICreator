@@ -214,7 +214,7 @@ export async function runCopilot(args: {
 
     const result = validateCampaignPlan(parsed, args.supportedMetricIds);
     if (result.ok) {
-      // 🔴 THE FIX: keep BOTH facts. The entry recorded the tool CALL; now it
+      // 🔴 THE FIX: keep BOTH facts. The turn recorded the tool CALL; now it
       // also records that the call was ACCEPTED. Overwriting it lost the fact
       // that the model actually called the tool - which is the whole point of
       // the transcript as evidence.

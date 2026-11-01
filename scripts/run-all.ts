@@ -1,5 +1,5 @@
 /**
- * Run every test. This is the ONE command a judge runs.
+ * Run every test. This is the ONE command you need.
  *
  *   npm test
  *

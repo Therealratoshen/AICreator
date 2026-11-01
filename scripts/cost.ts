@@ -1,8 +1,8 @@
 /**
  * WHAT DOES ONE PLAN COST?
  *
- * The cost of the copilot is a question a judge will ask and a small brand
- * will ask first, so it is computed here rather than asserted.
+ * The cost of the copilot is the first question a small brand asks, so it is
+ * computed here rather than asserted.
  *
  * THE PRICES are Baseten's published Model API rates for Muse Spark Open, per
  * million tokens, as fetched from https://www.baseten.co/pricing on 2026-11-01:

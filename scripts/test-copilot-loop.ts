@@ -1,7 +1,7 @@
 /**
  * The copilot loop's test.
  *
- * The loop is the claim that makes this entry interesting: on a model with NO
+ * The loop is the interesting part of this codebase: on a model with NO
  * structured-output support, a plan can still be made reliable - by producing
  * it through tool calling and validating every argument in code, then feeding
  * the exact errors back.

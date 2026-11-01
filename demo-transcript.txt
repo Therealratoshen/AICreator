@@ -1,0 +1,34 @@
+
+══════════════════════════════════════════════════════════════
+  CreatorGuard AI - the copilot loop
+══════════════════════════════════════════════════════════════
+  the model: the scripted model (no API key needed)
+
+── the transcript ──────────────────────────────────────────────
+
+  turn 1: tool_rejected
+    {"weekOf":"2026-11-03","cadencePerWeek":2,"creatorShortlist":[{"creatorId":"kol_aria","reason":"median saves 310, the highest here","justifyingMetric":310}],"contentBriefs":[{"creatorId":"kol_aria","objective":"introduce the serum","hook":"3 weeks of acne, one routine","cta":"link in bio","imageCount":2}],"citedMetrics":[{"metric":"median_saves_90d","sourceRowId":"row_aud_1","value":310},{"metric":"median_views_90d","sourceRowId":"row_best_view","value":4820}],"notes":"post twice in week one."}
+    ── the validator said ──
+    ✗ weekOf must be a Monday, got 2026-11-03 (a Tuesday)
+    ✗ citedMetrics[1].sourceRowId "row_best_view" does not exist - do not cite a row you have not read
+
+  turn 2: tool_accepted
+    {"weekOf":"2026-11-02","cadencePerWeek":2,"creatorShortlist":[{"creatorId":"kol_aria","reason":"median saves 310, the highest here","justifyingMetric":310}],"contentBriefs":[{"creatorId":"kol_aria","objective":"introduce the serum","hook":"3 weeks of acne, one routine","cta":"link in bio","imageCount":2}],"citedMetrics":[{"metric":"median_saves_90d","sourceRowId":"row_aud_1","value":310},{"metric":"median_views_90d","sourceRowId":"row_post_1","value":4820}],"notes":"post twice in week one."}
+
+── the plan ───────────────────────────────────────────────────
+  the week of:    2026-11-02
+  the cadence:    2 posts per week per creator
+  the shortlist:
+    · kol_aria - median saves 310, the highest here (310)
+  the briefs:
+    · kol_aria - 3 weeks of acne, one routine  [2 image(s)]
+  the cited metrics:
+    · median_saves_90d = 310  (row_aud_1)
+    · median_views_90d = 4820  (row_post_1)
+  the note:       post twice in week one.
+
+── the no-fakes guard ─────────────────────────────────────────
+  ✓ every number in this plan traces to a row that exists.
+
+  the run took 2 attempt(s).
+

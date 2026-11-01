@@ -1,0 +1,30 @@
+
+  the cost of one CreatorGuard plan
+  ────────────────────────────────────────────────────────────
+  the prices (Baseten's published rates, per million tokens):
+    input         $1.25
+    cached input  $0.15
+    output        $4.25
+
+  one accepted plan:
+    the tokens:  12000 in, 900 out
+      input (uncached)    12000  $0.0150
+      output                900  $0.00382
+    the cost:    $0.0188  (1.8825 cents)  ≈ Rp 307
+
+  one plan with a rejection and a retry:
+    the tokens:  24000 in, 1800 out
+      input (uncached)    24000  $0.0300
+      output               1800  $0.00765
+    the cost:    $0.0376  (3.765 cents)  ≈ Rp 614
+
+  what that means for the business this is for:
+    one week of plans for one brand:  $0.0188
+    one month of plans for one brand:  $0.0815  (≈ Rp 1,329)
+    one month for 100 brands:         $8.1512
+
+    ⇒ a brand with 5,000 followers can run this every week and still
+      spend less on the copilot than on a single boosted post.
+
+  the IDR figures use an assumed rate of Rp 16,300/USD.
+

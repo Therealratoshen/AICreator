@@ -1,7 +1,7 @@
 /**
  * The cost calculator's test.
  *
- * The number "one plan costs under two cents" is a claim a judge will check by
+ * The number "one plan costs under two cents" is a claim someone will check by
  * multiplying. This test checks the multiplication, so the claim cannot drift
  * away from the arithmetic.
  *

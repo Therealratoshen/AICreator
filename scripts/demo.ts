@@ -145,17 +145,17 @@ async function main() {
   });
 
   console.log("── the transcript ──────────────────────────────────────────────");
-  for (const entry of result.transcript) {
+  for (const turn of result.transcript) {
     console.log("");
-    console.log(`  turn ${entry.turn}: ${entry.action}`);
-    if (entry.raw) {
-      const lines = entry.raw.split("\n");
+    console.log(`  turn ${turn.turn}: ${turn.action}`);
+    if (turn.raw) {
+      const lines = turn.raw.split("\n");
       for (const l of lines.slice(0, 14)) console.log(`    ${l}`);
       if (lines.length > 14) console.log(`    ... (${lines.length - 14} more lines)`);
     }
-    if (entry.errors?.length) {
+    if (turn.errors?.length) {
       console.log("    ── the validator said ──");
-      for (const e of entry.errors) console.log(`    ✗ ${e}`);
+      for (const e of turn.errors) console.log(`    ✗ ${e}`);
     }
   }
   console.log("");
