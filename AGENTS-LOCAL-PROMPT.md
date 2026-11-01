@@ -153,6 +153,6 @@ This repository is public. Two rules follow from that:
 
 And one rule about how it reads:
 
-3. **Do not mention any competition, event, submission, deadline, judging, or
-   prize in this repository.** It is a general project repository about the
-   project. It is not an entry in anything.
+3. **This repository is about the project and nothing else.** Describe the
+   problem, the design, and the code. Do not add framing about where this came
+   from, who looked at it, or when — that is not what this repository is for.
