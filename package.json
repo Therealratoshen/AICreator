@@ -19,6 +19,7 @@
     "test:claims": "node --experimental-strip-types --no-warnings scripts/test-claims.ts",
     "test:reviewer": "node --experimental-strip-types --no-warnings scripts/test-reviewer.ts",
     "test:orchestrator": "node --experimental-strip-types --no-warnings scripts/test-orchestrator.ts",
+    "test:adversarial": "node --experimental-strip-types --no-warnings scripts/test-adversarial.ts",
     "test:web": "node --experimental-strip-types --no-warnings scripts/test-web.ts",
     "demo": "node --experimental-strip-types --no-warnings scripts/demo.ts",
     "demo:agents": "node --experimental-strip-types --no-warnings scripts/demo-agents.ts",

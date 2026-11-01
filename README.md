@@ -8,7 +8,7 @@
 
 ```bash
 git clone https://github.com/Therealratoshen/CreatorGuard-AI.git && cd CreatorGuard-AI
-npm test             # 343 assertions across 10 files — no install, no API key
+npm test             # 405 assertions across 11 files — no install, no API key
 npm run demo:agents  # the three-agent flow, in a terminal
 npm start            # the web app on http://127.0.0.1:3000
 npm run demo         # the core loop, with the transcript
@@ -164,11 +164,12 @@ A model is good at producing a *plausible* number. **Plausible is not the bar.**
 | [`scripts/test-planner.ts`](scripts/test-planner.ts) | **49 assertions** — invented rows, wrong values, another creator's number, and a creator with no data |
 | [`scripts/test-writer.ts`](scripts/test-writer.ts) | **42 assertions** — five ways to diverge from the strategy, plus the claim gates |
 | [`scripts/test-reviewer.ts`](scripts/test-reviewer.ts) | **40 assertions** — including that a model cannot approve what code rejected |
-| [`scripts/test-orchestrator.ts`](scripts/test-orchestrator.ts) | **47 assertions** — the flow, the revision, and that an exhausted run stores nothing |
+| [`scripts/test-orchestrator.ts`](scripts/test-orchestrator.ts) | **53 assertions** — the flow, the revision, and that an exhausted run stores nothing |
+| [`scripts/test-adversarial.ts`](scripts/test-adversarial.ts) | **56 assertions** — a model that ignores the contract, and the proof it still cannot publish |
 | [`scripts/test-web.ts`](scripts/test-web.ts) | **43 assertions** — the real server, over real HTTP |
 
-`npm test` runs all ten files, each in its own process, and prints one PASS/FAIL
-summary. **343 assertions.**
+`npm test` runs all eleven files, each in its own process, and prints one
+PASS/FAIL summary. **405 assertions.**
 
 **CI:** the workflow is committed at [`ci/guards.yml`](ci/guards.yml) — see the note in that file. The guards do not need CI to run: `npm test` is one command.
 
@@ -234,7 +235,10 @@ Being straight about this, because a reader should not have to guess.
 - the tool-calling loop with rejection-and-recovery (27 assertions)
 - the no-fakes guard — every number traces to a row, and the value matches (9 assertions)
 - the claim scanner — a statistic in a sentence, and promises no row could back (39 assertions)
-- the three-agent flow: planner, writer, reviewer, and the flow that orders them (178 assertions)
+- the three-agent flow: planner, writer, reviewer, and the flow that orders them (184 assertions)
+- an adversarial model that ignores the strategy, answers in prose, invents row ids and emits
+  malformed findings — and the proof that whatever it does, the run either publishes nothing or
+  publishes a plan that passes every gate (56 assertions)
 - the web app, driven by real HTTP in its test (43 assertions)
 - the cost calculator, with the arithmetic pinned by tests (17 assertions)
 - two runnable demos that show a wrong plan being rejected and then fixed

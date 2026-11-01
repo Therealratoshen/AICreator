@@ -19,6 +19,7 @@ const TESTS = [
   "scripts/test-claims.ts",
   "scripts/test-reviewer.ts",
   "scripts/test-orchestrator.ts",
+  "scripts/test-adversarial.ts",
   "scripts/test-web.ts",
 ];
 
