@@ -1,22 +1,11 @@
 # CI - the guards, on every push
-
-This is the GitHub Actions workflow for this repo, committed here rather than at
-`.github/workflows/guards.yml` because the token that published the repo is a
-fine-grained PAT **without the `workflow` scope**, and GitHub refuses to let
-such a token create or update a file under `.github/workflows/`.
-
-**To turn it on, copy this file to `.github/workflows/guards.yml`** and push. It
-runs the three guard files, runs the demo, and fails the build on a
-secret-shaped string.
-
-Until then, the guards run locally with one command:
-
-```bash
-npm test
-```
-
----
-
+#
+# This file is the workflow that runs on every push: the three guard files, the
+# demo, and a secret scan that fails the build.
+#
+# A copy also lives at `ci/guards.yml`, which explains the setup. That note is
+# kept here as a comment so this file stays pure YAML - GitHub's parser reads
+# the whole file, and prose above `name:` is not YAML.
 name: guards
 
 on:
@@ -39,7 +28,7 @@ jobs:
       - name: the guards
         run: node --experimental-strip-types --no-warnings scripts/run-all.ts
 
-      # 🔴 THE NO-FAKES GATE: this repo's central promise is that no number is
+      # THE NO-FAKES GATE: this repo's central promise is that no number is
       # published without a row behind it. The guard proves it on every push.
       - name: the demo still runs
         run: node --experimental-strip-types --no-warnings scripts/demo.ts
@@ -47,7 +36,7 @@ jobs:
       # The secret scan. A public repo must not grow a secret.
       - name: no secrets
         run: |
-          if grep -rInE 'sk_live_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----' \
+          if grep -rInE 'sk_live_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY----' \
              --exclude-dir=.git . ; then
             echo "::error::a secret-shaped string was found"
             exit 1
