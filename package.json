@@ -14,7 +14,15 @@
     "test:loop": "node --experimental-strip-types --no-warnings scripts/test-copilot-loop.ts",
     "test:nofakes": "node --experimental-strip-types --no-warnings scripts/test-no-fakes.ts",
     "test:cost": "node --experimental-strip-types --no-warnings scripts/test-cost.ts",
+    "test:planner": "node --experimental-strip-types --no-warnings scripts/test-planner.ts",
+    "test:writer": "node --experimental-strip-types --no-warnings scripts/test-writer.ts",
+    "test:claims": "node --experimental-strip-types --no-warnings scripts/test-claims.ts",
+    "test:reviewer": "node --experimental-strip-types --no-warnings scripts/test-reviewer.ts",
+    "test:orchestrator": "node --experimental-strip-types --no-warnings scripts/test-orchestrator.ts",
+    "test:web": "node --experimental-strip-types --no-warnings scripts/test-web.ts",
     "demo": "node --experimental-strip-types --no-warnings scripts/demo.ts",
+    "demo:agents": "node --experimental-strip-types --no-warnings scripts/demo-agents.ts",
+    "start": "node --experimental-strip-types --no-warnings src/web/server.ts",
     "cost": "node --experimental-strip-types --no-warnings scripts/cost.ts"
   }
 }
