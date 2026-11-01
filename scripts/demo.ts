@@ -16,7 +16,7 @@
  * real production code.
  */
 
-import { runCopilot, type ChatClient } from "../src/agent/copilot.ts";
+import { runCopilot, MODEL, type ChatClient } from "../src/agent/copilot.ts";
 import { checkNoFakes, type MetricRow } from "../src/agent/no-fakes.ts";
 import type { CampaignPlan } from "../src/agent/campaign-plan.ts";
 
@@ -101,7 +101,7 @@ function scriptedModel(): ChatClient {
 function liveModel(): ChatClient | null {
   const key = process.env.BASETEN_API_KEY;
   if (!key) return null;
-  const model = process.env.BASETEN_MODEL ?? "meta-models/muse-spark-open";
+  const model = process.env.BASETEN_MODEL ?? MODEL;
   const base = process.env.BASETEN_BASE_URL ?? "https://inference.baseten.co/v1";
   return {
     async complete({ messages, tools, tool_choice }) {
@@ -113,12 +113,16 @@ function liveModel(): ChatClient | null {
       if (!res.ok) throw new Error(`the model returned ${res.status}: ${await res.text()}`);
       const data: any = await res.json();
       const msg = data.choices?.[0]?.message ?? {};
+      // 🔴 The reasoning model puts its thinking in `reasoning_content`; the
+      // content can be EMPTY on a turn the model spent thinking. That is not a
+      // failure - it means the model is reasoning, and the tool call is what
+      // matters. The loop handles it.
       return {
         tool_calls: msg.tool_calls?.map((c: any) => ({
           id: c.id,
           function: { name: c.function.name, arguments: c.function.arguments },
         })),
-        content: msg.content,
+        content: msg.content ?? msg.reasoning_content ?? "",
       };
     },
   };
@@ -133,7 +137,7 @@ async function main() {
   console.log("══════════════════════════════════════════════════════════════");
   console.log("  CreatorGuard AI - the copilot loop");
   console.log("══════════════════════════════════════════════════════════════");
-  console.log(`  the model: ${live ? process.env.BASETEN_MODEL ?? "meta-models/muse-spark-open" : "the scripted model (no API key needed)"}`);
+  console.log(`  the model: ${live ? (process.env.BASETEN_MODEL ?? MODEL) : "the scripted model (no API key needed)"}`);
   console.log("");
 
   const result = await runCopilot({

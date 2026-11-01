@@ -1,0 +1,43 @@
+# The live transcript
+
+This is the real model - `meta-models/muse-spark-open` on Baseten - producing a real
+plan through the real loop, with the real validator and the real no-fakes guard.
+
+Reproduce it with:
+
+```bash
+export BASETEN_API_KEY=...   # a Baseten Model API key
+npm run demo
+```
+
+The transcript that follows is that run, verbatim.
+
+```
+
+══════════════════════════════════════════════════════════════
+  CreatorGuard AI - the copilot loop
+══════════════════════════════════════════════════════════════
+  the model: meta-models/muse-spark-open
+
+── the transcript ──────────────────────────────────────────────
+
+  turn 1: tool_accepted
+    {"weekOf": "2026-11-02", "cadencePerWeek": 3, "creatorShortlist": [{"creatorId": "kol_aria", "reason": "Top saves 310 (row_aud_1) exceeds brand median.", "justifyingMetric": 310}], "contentBriefs": [{"creatorId": "kol_aria", "objective": "Launch serum", "hook": "Glowing skin reveal", "cta": "Shop now", "imageCount": 2}], "citedMetrics": [{"metric": "kol_aria saves", "sourceRowId": "row_aud_1", "value": 310}], "notes": "Good luck with launch!"}
+
+── the plan ───────────────────────────────────────────────────
+  the week of:    2026-11-02
+  the cadence:    3 posts per week per creator
+  the shortlist:
+    · kol_aria - Top saves 310 (row_aud_1) exceeds brand median. (310)
+  the briefs:
+    · kol_aria - Glowing skin reveal  [2 image(s)]
+  the cited metrics:
+    · kol_aria saves = 310  (row_aud_1)
+  the note:       Good luck with launch!
+
+── the no-fakes guard ─────────────────────────────────────────
+  ✓ every number in this plan traces to a row that exists.
+
+  the run took 1 attempt(s).
+
+```

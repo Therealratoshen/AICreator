@@ -29,7 +29,7 @@ CreatorGuard is that decision, and it is deliberately small: **one weekly plan, 
  the brand's Meta/Instagram performance  ─┐
  (Meta Graph API + Instagram Platform)   │
                                          ├──▶  Muse Spark Open
- the creator's audience signals          │     (one 262,144-token context)
+ the creator's audience signals          │     (one 1,048,576-token context)
                                          │            │
                                          │            ▼
                                          │      submit_campaign_plan  ← the only way out
@@ -126,12 +126,12 @@ A model is good at producing a *plausible* number. **Plausible is not the bar.**
 
 | what | which | the detail |
 |---|---|---|
-| the copilot | **`meta-models/muse-spark-open`** (Baseten Model APIs) | Muse Spark Open — 816B total / 42B active MoE, **262,144-token context**, multimodal. Reasoning always on; `temperature`, `top_p`, `top_k`, `stop`, `presence_penalty`, `frequency_penalty` |
+| the copilot | **`meta-models/muse-spark-open`** (Baseten Model APIs) | Muse Spark Open — **1,048,576-token context** (1M), multimodal. Reasoning always on; `temperature`, `top_p`, `top_k`, `stop`, `presence_penalty`, `frequency_penalty` |
 | the creative variants | **Muse Image** (Meta Model API) | text + image in, image out — no per-image fee; images are priced as input tokens |
 | the creator's voice | **Muse Voice Transcribe** (Meta Model API) | audio in, text out |
 | segmentation | **SAM 3.1** (Meta Model API) | prompt + image → geometry |
 
-**Why this model.** The context window is what decided the choice: a brand's last 90 days of metrics plus a creator's full audience profile fit in **one** prompt — no summarization step, no retrieval, no lossy pipeline. And because Muse Spark Open is the model this is built around, the hard part — **no structured outputs** — is the part worth showing.
+**Why this model.** The context window is what decided the choice: a brand's last 90 days of metrics plus a creator's full audience profile fit in **one** prompt — no summarization step, no retrieval, no lossy pipeline. The model's own endpoint reports `context_length: 1048576`. And because Muse Spark Open is the model this is built around, the hard part — **no structured outputs** — is the part worth showing.
 
 **The price** (Baseten's published table, per million tokens):
 

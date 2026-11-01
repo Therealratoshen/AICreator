@@ -20,7 +20,7 @@
               ▼
   ┌────────────────────────────────────────────────────┐
   │  Muse Spark Open  (meta-models/muse-spark-open)    │
-  │  816B total / 42B active MoE · 262,144-token ctx   │
+  │  1,048,576-token context (1M) · multimodal            │
   │  reasoning always on · vision · temperature, top_p, │
   │  top_k, stop, presence_penalty, frequency_penalty   │
   │                                                    │
