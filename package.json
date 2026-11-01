@@ -1,0 +1,20 @@
+{
+  "name": "creatorguard-ai",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A campaign copilot for Indonesian small brands and independent creators - the Meta AI Developer Hackathon entry.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "test": "node --experimental-strip-types --no-warnings scripts/run-all.ts",
+    "test:validator": "node --experimental-strip-types --no-warnings scripts/test-plan-validator.ts",
+    "test:loop": "node --experimental-strip-types --no-warnings scripts/test-copilot-loop.ts",
+    "test:nofakes": "node --experimental-strip-types --no-warnings scripts/test-no-fakes.ts",
+    "test:cost": "node --experimental-strip-types --no-warnings scripts/test-cost.ts",
+    "demo": "node --experimental-strip-types --no-warnings scripts/demo.ts",
+    "cost": "node --experimental-strip-types --no-warnings scripts/cost.ts"
+  }
+}
