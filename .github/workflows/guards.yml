@@ -1,0 +1,36 @@
+name: guards
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  guards:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      # The guards run on Node's own type-stripping loader: no build step,
+      # no dependencies to install, nothing to go stale.
+      - name: the guards
+        run: node --experimental-strip-types --no-warnings scripts/run-all.ts
+
+      # 🔴 THE NO-FAKES GATE: this repo's central promise is that no number is
+      # published without a row behind it. The guard proves it on every push.
+      - name: the demo still runs
+        run: node --experimental-strip-types --no-warnings scripts/demo.ts
+
+      # The secret scan. A public repo must not grow a secret.
+      - name: no secrets
+        run: |
+          if grep -rInE 'sk_live_[A-Za-z0-9]{20,}|ghp_[A-Za-z0-9]{30,}|AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----' \
+             --exclude-dir=.git . ; then
+            echo "::error::a secret-shaped string was found"
+            exit 1
+          fi
+          echo "no secret-shaped strings"
