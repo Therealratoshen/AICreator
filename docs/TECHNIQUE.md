@@ -116,6 +116,54 @@ real row, so a creator cannot be recommended on a number nobody can produce.
 
 ---
 
+## The third hard thing: a number in a sentence
+
+`no-fakes.ts` checks `citedMetrics` — the list a plan declares. It cannot see a
+number written inside a sentence, because it never reads the sentences. So this
+passes every guard the core has:
+
+```ts
+citedMetrics: [ { metric: "median_saves_90d", sourceRowId: "kol_aria_saves", value: 610 } ]
+contentBriefs[0].hook: "4.900 orang menyimpan ini minggu lalu"
+```
+
+One real row is cited, a different number is stated, and nothing complains. The
+same hole exists for promises: "dijamin glowing dalam 7 hari" is a claim no row
+could ever support, because there is no row to look up.
+
+[`../src/agent/claims.ts`](../src/agent/claims.ts) reads the prose. Two rules:
+
+- **statistics** — a number of 100 or more, or anything with a `%`, must equal
+  a cited value. `4.820` and `4,820` are both tried, because the copy is
+  Indonesian and the same number has two notations;
+- **claims** — guarantees, cure claims, proof claims and absolutes are blocking,
+  because their form is what makes them unbackable. Superlatives and outcome
+  promises only warn, because a human should decide those.
+
+The severity split is load-bearing. If every finding blocked, a plan with one
+overenthusiastic adjective would burn all three writer attempts and escalate —
+a system that looks strict and is actually brittle.
+
+---
+
+## The fourth hard thing: a guard that a model can argue with
+
+Once a model is in the review path, the obvious risk is that it becomes a way to
+talk the guard down. A model asked "is this plan good?" is agreeable by
+training, and the plan is right there looking reasonable.
+
+So the reviewer's verdict is not the model's to give:
+
+```ts
+blocked = anyDeterministicBlock || anyModelBlock
+```
+
+Code findings are computed first, and the model's opinion is only ever added to
+them. The model can make the review stricter and can never make it more
+permissive. That asymmetry is what makes a third agent safe to have at all.
+
+---
+
 ## Why the layers are three files and not one
 
 | layer | file | the job | how it fails |
@@ -190,8 +238,9 @@ the plan.
 ## Where the project stands
 
 **Built, tested and in this repository:** the plan schema and validator, the
-tool-calling loop with rejection-and-recovery, the no-fakes guard, the cost
-calculator, 83 assertions across four test files, a runnable demo, and the
+tool-calling loop with rejection-and-recovery, the no-fakes guard, the claim
+scanner, the three-agent flow (planner, writer, reviewer), the web app, the cost
+calculator, 423 assertions across eleven test files, two runnable demos, and the
 committed transcript.
 
 **In the live product** ([justnewme.com](https://justnewme.com)): the
@@ -211,9 +260,11 @@ rows already are.
 ```bash
 git clone https://github.com/Therealratoshen/CreatorGuard-AI.git
 cd CreatorGuard-AI
-npm test          # 83 assertions
-npm run demo      # the loop, the rejection, the recovery, the guard
-npm run cost      # what one plan costs
+npm test             # 423 assertions
+npm run demo         # the core loop: the rejection, the recovery, the guard
+npm run demo:agents  # the three-agent flow: planner, writer, reviewer
+npm start            # the web app, no API key needed
+npm run cost         # what one plan costs
 ```
 
 Node 22.6+. No dependencies, no build step, no API key required.

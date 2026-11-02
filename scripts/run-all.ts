@@ -14,6 +14,13 @@ const TESTS = [
   "scripts/test-copilot-loop.ts",
   "scripts/test-no-fakes.ts",
   "scripts/test-cost.ts",
+  "scripts/test-planner.ts",
+  "scripts/test-writer.ts",
+  "scripts/test-claims.ts",
+  "scripts/test-reviewer.ts",
+  "scripts/test-orchestrator.ts",
+  "scripts/test-adversarial.ts",
+  "scripts/test-web.ts",
 ];
 
 let failed = 0;

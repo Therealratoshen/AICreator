@@ -59,19 +59,54 @@ specific, silent failure.
 6. **No secrets, ever.** Everything sensitive is read from the environment at
    runtime. `.env` is gitignored. The CI runs a secret scan on every push.
 
+7. **A number in a sentence is still a number.** `no-fakes.ts` checks
+   `citedMetrics`. It cannot see a figure written inside a hook, because it
+   never reads the prose. `claims.ts` reads it: a statistic of 100 or more, or
+   anything with a percentage, must trace to a cited row. A plan can cite one
+   real row and state a different number in the copy, and every other guard
+   will pass it — that is the gap this closes.
+
+8. **The model may add a finding, never remove one.** The reviewer's verdict is
+   computed as `anyDeterministicBlock || anyModelBlock`. A model that reads a
+   plan containing a fabricated statistic and reports nothing wrong cannot
+   approve it, because the code finding is already in the list. A third agent
+   is only safe to have because of this asymmetry: judgement can make the
+   review stricter, never more permissive.
+
+### Not plan exits
+
+Invariant 5 says the plan leaves through `submit_campaign_plan` and nothing
+else. Two other tools exist and neither of them produces a plan:
+
+| tool | who calls it | what it produces |
+|---|---|---|
+| `submit_campaign_strategy` | the planner | the week, cadence, creator shortlist and the justification for each pick |
+| `submit_review` | the reviewer | findings about a plan that already exists |
+
+A strategy is not a plan and a review is not a plan. The `CampaignPlan` object
+that reaches a brand is produced by exactly one tool call, and then checked by
+four gates before anything reads it.
+
 ---
 
 ## The commands
 
 ```bash
-npm test        # 83 assertions across 4 files. MUST pass before you commit.
-npm run demo    # the loop, end to end, with the transcript
-npm run cost    # what one plan costs, from the published rates
+npm test             # 423 assertions across 11 files. MUST pass before you commit.
+npm run demo         # the original single-agent loop, with the transcript
+npm run demo:agents  # the three-agent pipeline: planner, writer, reviewer
+npm start            # the web app on http://127.0.0.1:3000
+npm run cost         # what one plan costs, from the published rates
 ```
 
 Node 22.6+. No dependencies, no build step, no API key required. The tests run
 on Node's own type-stripping loader — keep it that way; do not add a
 toolchain, a bundler, or a `node_modules`.
+
+`npm start` and `npm run demo:agents` both work with no key: without
+`BASETEN_API_KEY` they use a scripted model that makes the mistakes a real one
+makes, so the guards have something to catch. The app says which mode it is in
+on screen. Never let it claim to be live when it is scripted.
 
 ---
 
@@ -122,6 +157,30 @@ toolchain, a bundler, or a `node_modules`.
 
 ---
 
+## What is here
+
+| | |
+|---|---|
+| the schema and validator | `src/agent/campaign-plan.ts` |
+| the loop | `src/agent/copilot.ts` (single agent), `src/agent/tool-loop.ts` (generalised) |
+| the guard | `src/agent/no-fakes.ts` |
+| the claim scanner | `src/agent/claims.ts` |
+| agent 1 — the planner | `src/agent/planner.ts` + `src/agent/strategy.ts` |
+| agent 2 — the writer | `src/agent/writer.ts` |
+| agent 3 — the reviewer | `src/agent/reviewer.ts` |
+| the single flow | `src/agent/orchestrator.ts` |
+| the web app | `src/web/` |
+
+The three agents run in one order, and the order is only written down in
+`orchestrator.ts`:
+
+```
+planner ──▶ strategy ──▶ writer ──▶ plan ──▶ reviewer
+              │                        ▲          │
+              │                        └─ revise ─┘
+              └─▶ no strategy: stop, no plan
+```
+
 ## What is NOT here yet
 
 Being precise, so nobody builds the wrong thing:
@@ -131,9 +190,10 @@ Being precise, so nobody builds the wrong thing:
 - the creator's mirror-image agent (explain your numbers, draft in your voice)
 - the wiring into the live marketplace, where the real rows are
 
-The public repository holds the **core**: the schema, the validator, the loop,
-the guard, and the tests. The product it extends is
-[justnewme.com](https://justnewme.com).
+The public repository holds the **core** and the **flow**: the schema, the
+validator, the loop, the guard, the three agents, the web app, and the tests.
+The data the web app runs on is synthetic and labelled as such. The product it
+extends is [justnewme.com](https://justnewme.com).
 
 ---
 

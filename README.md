@@ -8,9 +8,11 @@
 
 ```bash
 git clone https://github.com/Therealratoshen/CreatorGuard-AI.git && cd CreatorGuard-AI
-npm test        # 83 assertions across 4 guard files — no install, no API key
-npm run demo    # the loop, with the transcript
-npm run cost    # what one plan costs
+npm test             # 423 assertions across 11 files — no install, no API key
+npm run demo:agents  # the three-agent flow, in a terminal
+npm start            # the web app on http://127.0.0.1:3000
+npm run demo         # the core loop, with the transcript
+npm run cost         # what one plan costs
 ```
 
 ---
@@ -49,6 +51,46 @@ CreatorGuard is that decision, and it is deliberately small: **one weekly plan, 
 ```
 
 The creator gets the mirror image: **an agent that explains their own numbers** and drafts content **in their own voice**.
+
+---
+
+## Three agents, one flow
+
+One agent asked for "a weekly plan" reasons and writes in one breath, so when
+the result is rejected the retry re-reasons from scratch — and changes the
+cadence while fixing a date. Deciding, writing and checking are three jobs:
+
+```
+  PLANNER ──▶ strategy ──▶ WRITER ──▶ plan ──▶ REVIEWER
+  decides      week        writes      │        reads
+               cadence                 │          │
+               creators                │  ◀─ revise ┘
+               angle                   │     (at most twice)
+               constraints             ▼
+                              4 gates, in code
+```
+
+- **The planner** decides which creators, how often, what angle, and what the
+  writer must avoid. Every pick must cite a row, and that row must be *about
+  that creator* — a real number attached to the wrong person is rejected.
+- **The writer** turns the strategy into briefs. It cannot change the week, the
+  cadence or the shortlist: `checkStrategyConformance` rejects it if it tries.
+- **The reviewer** re-runs the code checks and then adds judgement — does the
+  copy express the angle, does a brief break a constraint. Its verdict is
+  computed as `anyCodeFinding || anyModelFinding`, so **a model can make the
+  review stricter and never more permissive**.
+
+When the revision budget runs out the run returns **no plan at all** — the same
+rule as the core, one level up.
+
+```bash
+npm run demo:agents   # planner, writer, reviewer — 3 rejections, 7 model calls
+npm start             # the same flow as a web app
+```
+
+The web app runs on **synthetic data, labelled as such on the page**, and needs
+no API key: without `BASETEN_API_KEY` it uses a scripted model that makes the
+mistakes a real one makes. It says which mode it is in, on screen.
 
 ---
 
@@ -111,12 +153,23 @@ A model is good at producing a *plausible* number. **Plausible is not the bar.**
 | [`src/agent/campaign-plan.ts`](src/agent/campaign-plan.ts) | the schema, and the validator that enforces it in code |
 | [`src/agent/copilot.ts`](src/agent/copilot.ts) | the tool-calling loop: call → validate → reject-with-reason → retry |
 | [`src/agent/no-fakes.ts`](src/agent/no-fakes.ts) | every number traces to a row, and the value matches |
+| [`src/agent/claims.ts`](src/agent/claims.ts) | a number written *in a sentence*, and the promises no row could back |
+| [`src/agent/strategy.ts`](src/agent/strategy.ts) | the planner's contract, and that the writer kept its decisions |
+| [`src/agent/orchestrator.ts`](src/agent/orchestrator.ts) | the order, and that a rejected plan is never published |
 | [`scripts/test-plan-validator.ts`](scripts/test-plan-validator.ts) | **30 assertions** — every mutation of a good plan is rejected, for the right reason |
 | [`scripts/test-copilot-loop.ts`](scripts/test-copilot-loop.ts) | **27 assertions** — rejection, recovery, no-recovery, prose, broken JSON |
 | [`scripts/test-no-fakes.ts`](scripts/test-no-fakes.ts) | **9 assertions** — invented rows, wrong values, unsupported justifications |
 | [`scripts/test-cost.ts`](scripts/test-cost.ts) | **17 assertions** — the pricing, the arithmetic, and the "under two cents" claim this README makes |
+| [`scripts/test-claims.ts`](scripts/test-claims.ts) | **39 assertions** — statistics in prose, promises, and the numbers that must *not* be flagged |
+| [`scripts/test-planner.ts`](scripts/test-planner.ts) | **49 assertions** — invented rows, wrong values, another creator's number, and a creator with no data |
+| [`scripts/test-writer.ts`](scripts/test-writer.ts) | **42 assertions** — five ways to diverge from the strategy, plus the claim gates |
+| [`scripts/test-reviewer.ts`](scripts/test-reviewer.ts) | **40 assertions** — including that a model cannot approve what code rejected |
+| [`scripts/test-orchestrator.ts`](scripts/test-orchestrator.ts) | **53 assertions** — the flow, the revision, and that an exhausted run stores nothing |
+| [`scripts/test-adversarial.ts`](scripts/test-adversarial.ts) | **56 assertions** — a model that ignores the contract, and the proof it still cannot publish |
+| [`scripts/test-web.ts`](scripts/test-web.ts) | **61 assertions** — the real server over real HTTP, the form journey, and the script that must run after the DOM |
 
-`npm test` runs all four files, each in its own process, and prints one PASS/FAIL summary.
+`npm test` runs all eleven files, each in its own process, and prints one
+PASS/FAIL summary. **423 assertions.**
 
 **CI:** the workflow is committed at [`ci/guards.yml`](ci/guards.yml) — see the note in that file. The guards do not need CI to run: `npm test` is one command.
 
@@ -181,8 +234,14 @@ Being straight about this, because a reader should not have to guess.
 - the plan schema and the validator that enforces it (30 assertions)
 - the tool-calling loop with rejection-and-recovery (27 assertions)
 - the no-fakes guard — every number traces to a row, and the value matches (9 assertions)
+- the claim scanner — a statistic in a sentence, and promises no row could back (39 assertions)
+- the three-agent flow: planner, writer, reviewer, and the flow that orders them (184 assertions)
+- an adversarial model that ignores the strategy, answers in prose, invents row ids and emits
+  malformed findings — and the proof that whatever it does, the run either publishes nothing or
+  publishes a plan that passes every gate (56 assertions)
+- the web app, driven by real HTTP in its test, including the form a person actually clicks (61 assertions)
 - the cost calculator, with the arithmetic pinned by tests (17 assertions)
-- a runnable demo that shows a wrong plan being rejected and then fixed
+- two runnable demos that show a wrong plan being rejected and then fixed
 - the committed transcript, so the behaviour can be read without running anything
 
 **Built in the live product, and the reason this project exists:**
