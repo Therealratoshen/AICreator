@@ -21,6 +21,7 @@ const TESTS = [
   "scripts/test-orchestrator.ts",
   "scripts/test-adversarial.ts",
   "scripts/test-web.ts",
+  "scripts/test-creator.ts",
 ];
 
 let failed = 0;
