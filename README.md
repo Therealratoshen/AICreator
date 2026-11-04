@@ -11,6 +11,10 @@ The public code contains two related flows:
 
 The web app currently demonstrates the brand campaign flow. The creator flow is available as source and tests; it is not a separate web screen. The included brand and creator records are synthetic. No justnewme.com customer, creator, or production database records are required to run this repository.
 
+![Step-by-step guide to running the public demo and understanding its campaign flow](docs/images/ai-creator-step-by-step.svg)
+
+The image shows the current brand campaign demo. The creator-side agent is available in source and tests; image and video generation are planned.
+
 ## Run locally
 
 Node.js 22.6 or newer is required. There are no package dependencies or install step.

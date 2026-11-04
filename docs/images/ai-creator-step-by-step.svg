@@ -1,0 +1,68 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" role="img" aria-labelledby="title description">
+  <title id="title">AI Creator: how to use it and how the current demo works</title>
+  <desc id="description">Two step-by-step lanes. First run tests, the campaign demo, and the web app. Then synthetic rows pass through planning, validation, and review. Image and video generation are planned, not available today.</desc>
+  <rect width="1440" height="900" fill="#f4f7fb"/>
+  <rect x="48" y="42" width="1344" height="816" rx="28" fill="#ffffff" stroke="#dbe3ec" stroke-width="2"/>
+  <text x="90" y="108" font-family="Arial, Helvetica, sans-serif" font-size="42" font-weight="700" fill="#142d42">AI Creator · step by step</text>
+  <text x="90" y="151" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#486477">Public demo from the justnewme.com project · synthetic data · no API key needed</text>
+
+  <rect x="90" y="190" width="1260" height="54" rx="12" fill="#dceef2"/>
+  <text x="112" y="226" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#0b5360">1 · HOW TO USE THE CURRENT DEMO</text>
+
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="90" y="268" width="292" height="170" rx="18" fill="#eaf3f7" stroke="#b9d8e2"/>
+    <circle cx="126" cy="305" r="21" fill="#0b6979"/><text x="119" y="313" font-size="22" font-weight="700" fill="#fff">1</text>
+    <text x="160" y="313" font-size="24" font-weight="700" fill="#17384a">Clone</text>
+    <text x="112" y="355" font-size="20" fill="#36586b">Get the public repo</text>
+    <text x="112" y="390" font-size="17" fill="#36586b">github.com/Therealratoshen/</text>
+    <text x="112" y="414" font-size="17" fill="#36586b">AICreator</text>
+
+    <rect x="412" y="268" width="292" height="170" rx="18" fill="#eaf3f7" stroke="#b9d8e2"/>
+    <circle cx="448" cy="305" r="21" fill="#0b6979"/><text x="441" y="313" font-size="22" font-weight="700" fill="#fff">2</text>
+    <text x="482" y="313" font-size="24" font-weight="700" fill="#17384a">Check</text>
+    <text x="434" y="355" font-size="20" fill="#36586b">Run the validation suite</text>
+    <rect x="434" y="379" width="244" height="42" rx="8" fill="#17384a"/><text x="449" y="406" font-size="19" font-family="monospace" fill="#fff">npm test</text>
+
+    <rect x="734" y="268" width="292" height="170" rx="18" fill="#eaf3f7" stroke="#b9d8e2"/>
+    <circle cx="770" cy="305" r="21" fill="#0b6979"/><text x="763" y="313" font-size="22" font-weight="700" fill="#fff">3</text>
+    <text x="804" y="313" font-size="24" font-weight="700" fill="#17384a">Watch the flow</text>
+    <text x="756" y="355" font-size="20" fill="#36586b">Run the terminal demo</text>
+    <rect x="756" y="379" width="244" height="42" rx="8" fill="#17384a"/><text x="771" y="406" font-size="18" font-family="monospace" fill="#fff">npm run demo:agents</text>
+
+    <rect x="1056" y="268" width="294" height="170" rx="18" fill="#eaf3f7" stroke="#b9d8e2"/>
+    <circle cx="1092" cy="305" r="21" fill="#0b6979"/><text x="1085" y="313" font-size="22" font-weight="700" fill="#fff">4</text>
+    <text x="1126" y="313" font-size="24" font-weight="700" fill="#17384a">Open the app</text>
+    <text x="1078" y="355" font-size="20" fill="#36586b">Run <tspan font-family="monospace">npm start</tspan></text>
+    <text x="1078" y="390" font-size="18" fill="#36586b">127.0.0.1:3000</text>
+  </g>
+
+  <rect x="90" y="475" width="1260" height="54" rx="12" fill="#eee9fb"/>
+  <text x="112" y="511" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="700" fill="#533c8b">2 · HOW THE CAMPAIGN DEMO WORKS</text>
+
+  <g font-family="Arial, Helvetica, sans-serif">
+    <rect x="90" y="552" width="292" height="151" rx="18" fill="#f5f1fc" stroke="#d5c9ef"/>
+    <text x="112" y="592" font-size="23" font-weight="700" fill="#46356d">Synthetic rows</text>
+    <text x="112" y="628" font-size="19" fill="#594d73">Brand metrics + creators</text>
+    <text x="112" y="661" font-size="18" fill="#594d73">No production data</text>
+
+    <rect x="412" y="552" width="292" height="151" rx="18" fill="#f5f1fc" stroke="#d5c9ef"/>
+    <text x="434" y="592" font-size="23" font-weight="700" fill="#46356d">Plan + briefs</text>
+    <text x="434" y="628" font-size="19" fill="#594d73">Planner chooses creators</text>
+    <text x="434" y="661" font-size="18" fill="#594d73">Writer drafts the plan</text>
+
+    <rect x="734" y="552" width="292" height="151" rx="18" fill="#f5f1fc" stroke="#d5c9ef"/>
+    <text x="756" y="592" font-size="23" font-weight="700" fill="#46356d">Validate</text>
+    <text x="756" y="628" font-size="19" fill="#594d73">Check cited rows + claims</text>
+    <text x="756" y="661" font-size="18" fill="#594d73">Reject and retry if wrong</text>
+
+    <rect x="1056" y="552" width="294" height="151" rx="18" fill="#f5f1fc" stroke="#d5c9ef"/>
+    <text x="1078" y="592" font-size="23" font-weight="700" fill="#46356d">Review</text>
+    <text x="1078" y="628" font-size="19" fill="#594d73">Check the draft again</text>
+    <text x="1078" y="661" font-size="18" fill="#594d73">Return a validated plan</text>
+  </g>
+  <g fill="#8067b5"><path d="M390 622h6v-8l13 12-13 12v-8h-6z"/><path d="M712 622h6v-8l13 12-13 12v-8h-6z"/><path d="M1034 622h6v-8l13 12-13 12v-8h-6z"/></g>
+
+  <rect x="90" y="735" width="1260" height="88" rx="15" fill="#fff3da" stroke="#efd49a"/>
+  <text x="112" y="773" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#79530e">COMING LATER: IMAGE + VIDEO ASSETS</text>
+  <text x="112" y="803" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#79530e">Today's plan includes image counts, but does not generate or attach media. See the README roadmap.</text>
+</svg>
