@@ -1,7 +1,7 @@
 You are working on **CreatorGuard AI** — a campaign copilot for Indonesian small
 brands and independent creators.
 
-Repository: https://github.com/Therealratoshen/CreatorGuard-AI
+Repository: https://github.com/Therealratoshen/AICreator
 The product it extends: https://justnewme.com (live)
 
 ---
@@ -116,11 +116,10 @@ Being precise, so nobody builds the wrong thing:
 
 - the WhatsApp/Messenger delivery adapter
 - the Muse Image variant generation (it consumes the validated plan)
-- the creator's mirror-image agent (explain your numbers, draft in your voice)
 - the wiring into the live marketplace, where the real rows are
 
-This repository holds the **core**: the schema, the validator, the loop, the
-guard, and the tests.
+This repository holds the **core** and both agent flows: schemas, validators,
+loops, guards, the brand-flow web app, and tests.
 
 ---
 

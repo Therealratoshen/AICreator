@@ -239,8 +239,8 @@ the plan.
 
 **Built, tested and in this repository:** the plan schema and validator, the
 tool-calling loop with rejection-and-recovery, the no-fakes guard, the claim
-scanner, the three-agent flow (planner, writer, reviewer), the web app, the cost
-calculator, 423 assertions across eleven test files, two runnable demos, and the
+scanner, the three-agent flow (planner, writer, reviewer), the creator-side
+agent and guards, the brand-flow web app, the cost calculator, 506 assertions across twelve test files, two runnable demos, and the
 committed transcript.
 
 **In the live product** ([justnewme.com](https://justnewme.com)): the
@@ -249,18 +249,17 @@ via Facebook Login, the scopes `instagram_basic`, `instagram_manage_insights`,
 `pages_show_list`, `pages_read_engagement`, and media insights with view, like
 and comment counts. The live channel today is **TikTok**.
 
-**Next:** the WhatsApp/Messenger adapter, the Muse Image variants, the creator's
-mirror-image agent, and the wiring into the live marketplace where the real
-rows already are.
+**Next:** the WhatsApp/Messenger adapter, the Muse Image variants, and wiring
+into the live marketplace.
 
 ---
 
 ## Reproduce everything
 
 ```bash
-git clone https://github.com/Therealratoshen/CreatorGuard-AI.git
-cd CreatorGuard-AI
-npm test             # 423 assertions
+git clone https://github.com/Therealratoshen/AICreator.git
+cd AICreator
+npm test             # 506 assertions
 npm run demo         # the core loop: the rejection, the recovery, the guard
 npm run demo:agents  # the three-agent flow: planner, writer, reviewer
 npm start            # the web app, no API key needed
