@@ -8,8 +8,9 @@ whoever (or whatever) is changing it. Read it before you touch anything.
 
 ## What this project is
 
-A brand's Instagram/Meta performance and a creator's audience signals go into
-one prompt. The model returns a weekly campaign plan: a cadence, a creator
+Brand performance rows and creator audience signals go into one prompt. The
+public demo uses synthetic rows; justnewme.com currently supports TikTok as its
+live campaign channel, with Instagram support planned. The model returns a weekly campaign plan: a cadence, a creator
 shortlist, a content brief per creator, and the metrics the plan rests on.
 
 The model is **Muse Spark Open** (`meta-models/muse-spark-open`, via Baseten's

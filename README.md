@@ -11,6 +11,8 @@ The public code contains two related flows:
 
 The web app currently demonstrates the brand campaign flow. The creator flow is available as source and tests; it is not a separate web screen. The included brand and creator records are synthetic. No justnewme.com customer, creator, or production database records are required to run this repository.
 
+**Platform availability:** justnewme.com currently supports **TikTok** as its live campaign channel. **Instagram support is on the roadmap.** This public AI demo does not connect to or publish on either platform.
+
 ![Step-by-step guide to running the public demo and understanding its campaign flow](docs/images/ai-creator-step-by-step.svg)
 
 The image shows the current brand campaign demo. The creator-side agent is available in source and tests; image and video generation are planned.
@@ -51,6 +53,10 @@ These are planned stages, not features available in the current demo. No release
 4. **Plan delivery:** expose approved image and video assets alongside the validated schedule and briefs when this module is connected to the justnewme.com product. Delivery and publication controls will be defined before that integration.
 
 The plan's existing validation protects cited metrics and written claims. Media generation will need its own checks for asset provenance, usage rights, brand suitability, and human approval before any generated asset can be published.
+
+## Platform roadmap
+
+The live product supports TikTok campaigns today. Instagram campaign support is planned: connect authorized Instagram accounts, read permitted performance data, adapt briefs to Instagram formats, and validate the end-to-end publishing and reporting flow. This repository does not implement that platform connection, and no launch date is committed.
 
 ## Public sharing boundary
 

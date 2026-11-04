@@ -223,9 +223,10 @@ that the README makes, so the two cannot drift apart.
 
 ## The data path
 
-A brand's performance and a creator's audience signals are read through the
-Meta Graph API and the Instagram Platform, and placed in the model request for
-the plan.
+The public demo passes synthetic brand and creator rows to the model. A future
+Instagram integration would read authorized performance and audience data and
+pass the resulting rows through the same validation flow. The live product
+currently supports TikTok campaigns; Instagram campaign support is planned.
 
 - **Zero data retention.** Baseten does not store inputs or outputs for
   synchronous Model API requests, so a small brand's real metrics are not left
@@ -244,13 +245,12 @@ agent and guards, the brand-flow web app, the cost calculator, 506 assertions ac
 committed transcript.
 
 **In the live product** ([justnewme.com](https://justnewme.com)): the
-marketplace itself, including a real Instagram Graph API integration — OAuth
-via Facebook Login, the scopes `instagram_basic`, `instagram_manage_insights`,
-`pages_show_list`, `pages_read_engagement`, and media insights with view, like
-and comment counts. The live channel today is **TikTok**.
+marketplace currently supports **TikTok** as its live campaign channel.
+Instagram campaign support is on the roadmap. This public repository does not
+connect to either platform.
 
-**Next:** the WhatsApp/Messenger adapter, the Muse Image variants, and wiring
-into the live marketplace.
+**Next:** Instagram campaign support, the WhatsApp/Messenger adapter, image and
+video assets, and wiring this AI module into the live marketplace.
 
 ---
 
