@@ -92,7 +92,7 @@ four gates before anything reads it.
 ## The commands
 
 ```bash
-npm test             # 423 assertions across 11 files. MUST pass before you commit.
+npm test             # 506 assertions across 12 files. MUST pass before you commit.
 npm run demo         # the original single-agent loop, with the transcript
 npm run demo:agents  # the three-agent pipeline: planner, writer, reviewer
 npm start            # the web app on http://127.0.0.1:3000
@@ -187,11 +187,11 @@ Being precise, so nobody builds the wrong thing:
 
 - the WhatsApp/Messenger delivery adapter
 - the Muse Image variant generation (it consumes the validated plan)
-- the creator's mirror-image agent (explain your numbers, draft in your voice)
 - the wiring into the live marketplace, where the real rows are
 
 The public repository holds the **core** and the **flow**: the schema, the
-validator, the loop, the guard, the three agents, the web app, and the tests.
+validator, the loop, the guard, the three brand agents, the creator-side agent,
+the brand-flow web app, and the tests.
 The data the web app runs on is synthetic and labelled as such. The product it
 extends is [justnewme.com](https://justnewme.com).
 

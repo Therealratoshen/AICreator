@@ -1,30 +1,9 @@
-# Security Policy
+# Security and public data boundary
 
-## What this repo contains
+This repository is a public demonstration of AI Creator and brand campaign planning functionality from the justnewme.com project. The tracked fixtures are synthetic. The public demo does not connect to the production marketplace or include its credentials or customer data.
 
-This repository contains **the copilot's core**: the plan schema, the validator
-that enforces it, the tool-calling loop, and the no-fakes guard.
+API keys are read from environment variables at runtime. Do not commit `.env` files, keys, creator voice memos, real metrics, customer records, or production exports. Review new fixtures and transcripts before publishing them. A `.gitignore` rule alone does not remove a file that was already committed.
 
-It contains **no credentials and no data**. Every secret is read from the
-environment at runtime; nothing sensitive is committed. See
-[`.gitignore`](.gitignore).
+The validators check model output against the rows supplied to them. An integrator is responsible for authentication, consent, access control, data retention, and secure handling of any real rows or audio passed into the modules. The default web demo uses synthetic rows and a scripted model when no model key is configured.
 
-## The data path, and where a brand's data goes
-
-A brand's Meta/Instagram performance and a creator's audience signals are read
-through the Meta Graph API and the Instagram Platform, and are placed in the
-model request for the plan. Two properties of that path are deliberate:
-
-1. **Zero data retention.** Baseten applies zero data retention to synchronous
-   Model API requests, so a brand's real metrics are not kept in an inference
-   log.
-2. **No number is published without a row.** Every metric in a generated plan
-   carries a `sourceRowId`, and the validator rejects any plan that cites a row
-   that does not exist. The guard in `src/agent/no-fakes.ts` additionally
-   rejects a plan whose cited value disagrees with the row's own value.
-
-## Reporting a vulnerability
-
-Open a GitHub issue on this repository. Please do not include a live token, a
-real brand's metrics, or a real creator's personal data in the report — a
-synthetic reproduction is enough and is safer for everyone.
+To report a vulnerability, use GitHub's private vulnerability reporting for this repository if enabled. Otherwise, contact the repository owner through a private channel. Do not put live tokens or personal data in a public issue; use a synthetic reproduction.
