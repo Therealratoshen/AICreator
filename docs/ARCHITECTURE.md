@@ -1,14 +1,19 @@
 # Architecture
 
+The diagram below describes a proposed integration path. The runnable public
+demo uses synthetic rows and has no live social-platform connection.
+[justnewme.com](https://justnewme.com) currently supports TikTok as its live
+campaign channel; Instagram support is on the roadmap.
+
 ## The pipeline
 
 ```
   ┌─────────────────────────┐
-  │  the brand's account    │
-  │  Meta Graph API v18.0   │   instagram_basic
-  │  + Instagram Platform   │   instagram_manage_insights
-  │                         │   pages_show_list
-  │                         │   pages_read_engagement
+  │  planned Instagram data │
+  │  Meta Graph API         │   authorized account access
+  │  + Instagram Platform   │   permitted insights
+  │                         │
+  │                         │
   └───────────┬─────────────┘
               │  media insights: view_count, like_count, comments_count
               │
@@ -46,7 +51,7 @@
   │  · every justification traces to a real row         │
   └───────────┬────────────────────────────────────────┘
               ▼
-        the plan → Muse Image variants → WhatsApp / Messenger
+        the validated plan → future image/video assets and delivery
 ```
 
 ## The three agents

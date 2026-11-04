@@ -62,7 +62,8 @@
   </g>
   <g fill="#8067b5"><path d="M390 622h6v-8l13 12-13 12v-8h-6z"/><path d="M712 622h6v-8l13 12-13 12v-8h-6z"/><path d="M1034 622h6v-8l13 12-13 12v-8h-6z"/></g>
 
-  <rect x="90" y="735" width="1260" height="88" rx="15" fill="#fff3da" stroke="#efd49a"/>
-  <text x="112" y="773" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#79530e">COMING LATER: IMAGE + VIDEO ASSETS</text>
-  <text x="112" y="803" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#79530e">Today's plan includes image counts, but does not generate or attach media. See the README roadmap.</text>
+  <rect x="90" y="725" width="1260" height="110" rx="15" fill="#fff3da" stroke="#efd49a"/>
+  <text x="112" y="761" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#79530e">COMING LATER: IMAGE + VIDEO ASSETS</text>
+  <text x="112" y="790" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#79530e">Today's plan includes image counts, but does not generate or attach media. See the README roadmap.</text>
+  <text x="112" y="818" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#79530e">justnewme.com campaigns: TikTok now; Instagram planned. This demo has no live platform connection.</text>
 </svg>
