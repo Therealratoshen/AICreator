@@ -29,7 +29,24 @@ Open <http://127.0.0.1:3000> after `npm start`. Without `BASETEN_API_KEY`, the d
 
 ## How the functionality works
 
-The model must call a submission tool. Application code validates the tool arguments, checks cited values against their source rows, and returns specific rejection reasons for a retry. A run that exhausts its attempts returns no accepted plan or creator response. The brand flow uses planner, writer, and reviewer stages; the creator flow handles metric explanations and caption drafts. See [Technique](docs/TECHNIQUE.md) and [Architecture](docs/ARCHITECTURE.md) for implementation details.
+1. The brand flow receives metric rows and creator records. The public demo supplies synthetic records.
+2. The planner chooses a week, posting cadence, creator shortlist, and campaign angle. The writer turns that strategy into a brief for each creator.
+3. The model submits the plan through a tool. Application code checks its shape, cited row IDs, metric values, and claims in the copy. A rejected plan receives specific reasons for a retry.
+4. The reviewer checks the accepted draft and can request revisions. If the retry budget is exhausted, the flow returns no plan.
+5. The creator flow separately explains a creator's metrics or drafts a caption from their own past captions. Its responses pass their own validation and unsupported-number checks.
+
+The current campaign plan is **text and structured data**: a weekly schedule, creator shortlist, and content briefs. A brief includes an `imageCount` field describing the intended number of images, but this repository does **not generate or attach image or video files**. See [Technique](docs/TECHNIQUE.md) and [Architecture](docs/ARCHITECTURE.md) for implementation details.
+
+## Media roadmap
+
+These are planned stages, not features available in the current demo. No release dates are committed.
+
+1. **Image briefs:** expand each validated content brief with explicit visual direction and asset requirements, while preserving its creator and campaign references.
+2. **Image generation:** generate candidate images from approved briefs, let a person review them, and attach selected assets to the plan with their source and approval status.
+3. **Video briefs and drafts:** add a storyboard, shot list, timing, and caption or voiceover guidance for short videos, then generate or assemble draft video assets for review.
+4. **Plan delivery:** expose approved image and video assets alongside the validated schedule and briefs when this module is connected to the justnewme.com product. Delivery and publication controls will be defined before that integration.
+
+The plan's existing validation protects cited metrics and written claims. Media generation will need its own checks for asset provenance, usage rights, brand suitability, and human approval before any generated asset can be published.
 
 ## Public sharing boundary
 
@@ -37,6 +54,6 @@ The model must call a submission tool. Application code validates the tool argum
 
 **Excluded:** the justnewme.com marketplace source, production integrations and credentials, private prompts or configuration, and real brand or creator data. The public demo does not read from justnewme.com's database or Instagram account. An application integrating these modules must supply its own authorized data and deployment controls.
 
-Image variant generation, WhatsApp/Messenger delivery, and wiring into the live marketplace are outside this repository. The voice transcription adapter is present, but a live call requires a separate API key and is not part of the default demo.
+Image and video generation, WhatsApp/Messenger delivery, and wiring into the live marketplace are outside this repository today. The voice transcription adapter is present, but a live call requires a separate API key and is not part of the default demo.
 
 Before contributing, read [AGENTS.md](AGENTS.md) for the code invariants and [SECURITY.md](SECURITY.md) for safe reporting. Do not commit credentials, personal data, or production exports. Code is licensed under [Apache-2.0](LICENSE).
