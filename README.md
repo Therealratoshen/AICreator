@@ -17,6 +17,12 @@ The web app currently demonstrates the brand campaign flow. The creator flow is 
 
 The image shows the current brand campaign demo. The creator-side agent is available in source and tests; image and video generation are planned.
 
+## Start here if you are evaluating the project
+
+Read the [judge's guide](docs/JUDGE_GUIDE.md) for a five-minute walkthrough, the technical design, code pointers, reproducible checks, and an explicit list of what this demo does not prove. The central idea is simple: **the model proposes a plan; application code checks its structure and evidence before anyone sees it**. A rejected result gets a specific reason to retry, and an exhausted run returns no plan.
+
+This repo demonstrates the AI module, not marketplace infrastructure. It has no creator signup, authentication, persistent database, production deployment configuration, or 5,000-user load test. Capacity for 5,000 creators must be assessed in the main justnewme.com application and its connected services; the passing tests here do not establish that capacity.
+
 ## Run locally
 
 Node.js 22.6 or newer is required. There are no package dependencies or install step.
