@@ -8,6 +8,8 @@ A brand asks for a campaign. Three agents propose a strategy, write briefs, and 
 
 **Key technical choice:** a fluent model answer is not treated as evidence. A plan is returned only after deterministic checks accept it. If the retry budget is exhausted, the run returns no plan.
 
+The configured live model is **Meta's Muse Spark Open** (`meta-models/muse-spark-open`). The included live adapter uses Baseten's Model APIs, but Baseten is **optional for the local demo and tests**: without `BASETEN_API_KEY`, the repo uses a labelled scripted model. The same application validators run in both modes. The scripted mode verifies the workflow and rejection handling, not the quality of a live Muse Spark Open response.
+
 ## Five-minute walkthrough
 
 1. Use Node.js 22.6 or newer. Run `npm test` at the repository root. The suite covers the real plan validator, agent loops, guards, web routes, and creator response logic with deterministic fixtures.

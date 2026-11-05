@@ -4,6 +4,8 @@ This repository shares the **AI Creator and campaign planning functionality** de
 
 The public code contains two related flows:
 
+**Model and runtime:** the live-model path is configured for **Meta's Muse Spark Open** (`meta-models/muse-spark-open`). **Baseten is optional for running this repository:** without `BASETEN_API_KEY`, the demos and web app use a clearly labelled scripted model and still execute the real validation code. With the key, the included adapter calls Muse Spark Open through Baseten's Model APIs. A scripted run demonstrates the workflow; it is not evidence of live-model quality.
+
 | Flow | What it does | Entry points |
 | --- | --- | --- |
 | Brand campaign copilot | Plans a week of creator campaigns, checks cited metric rows, and reviews briefs before returning a plan. | `src/agent/orchestrator.ts`, `scripts/demo-agents.ts`, `src/web/` |
