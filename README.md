@@ -13,6 +13,8 @@ The public code contains two related flows:
 
 The web app currently demonstrates the brand campaign flow. The creator flow is available as source and tests; it is not a separate web screen. The included brand and creator records are synthetic. No justnewme.com customer, creator, or production database records are required to run this repository.
 
+**Name clarification:** “AI Creator” here means an assistant for a creator's metric questions and caption drafts. The main justnewme.com workspace also uses “AI creator” for a creator-controlled profile declaration about AI-assisted content or a virtual persona. That declaration is a separate product feature. This repository does not implement its profile toggle, badge, discovery filter, or verification of AI-generated content.
+
 **Platform availability:** justnewme.com currently supports **TikTok** as its live campaign channel. **Instagram support is on the roadmap.** This public AI demo does not connect to or publish on either platform.
 
 ![Step-by-step guide to running the public demo and understanding its campaign flow](docs/images/ai-creator-step-by-step.svg)
@@ -33,6 +35,7 @@ Node.js 22.6 or newer is required. There are no package dependencies or install 
 git clone https://github.com/Therealratoshen/AICreator.git
 cd AICreator
 npm test
+npm run test:creator
 npm run demo:agents
 npm start
 ```
@@ -40,6 +43,8 @@ npm start
 Open <http://127.0.0.1:3000> after `npm start`. Without `BASETEN_API_KEY`, the demos and web app use a scripted model and label that mode. The validation code still runs. To call the live model, set `BASETEN_API_KEY` in your environment before running a demo or the server. Keep the key out of files and commits.
 
 `npm run demo` exercises the single agent campaign loop. `npm run cost` prints an illustrative estimate from the rates and token counts in `scripts/cost.ts`; it is not a measured bill or a pricing promise.
+
+`npm run test:creator` runs the creator-specific fixtures: metric explanation, caption checks, rejection of unsupported numbers, and the scripted voice path. It uses synthetic records and a scripted model; it does not make a live model or transcription call. For the creator entry point, inspect `runCreatorAgent()` and `runCreatorAgentFromVoice()` in `src/agent/creator-agent.ts` alongside `scripts/test-creator.ts`.
 
 ## How the functionality works
 

@@ -21,6 +21,7 @@
     "test:orchestrator": "node --experimental-strip-types --no-warnings scripts/test-orchestrator.ts",
     "test:adversarial": "node --experimental-strip-types --no-warnings scripts/test-adversarial.ts",
     "test:web": "node --experimental-strip-types --no-warnings scripts/test-web.ts",
+    "test:creator": "node --experimental-strip-types --no-warnings scripts/test-creator.ts",
     "demo": "node --experimental-strip-types --no-warnings scripts/demo.ts",
     "demo:agents": "node --experimental-strip-types --no-warnings scripts/demo-agents.ts",
     "start": "node --experimental-strip-types --no-warnings src/web/server.ts",

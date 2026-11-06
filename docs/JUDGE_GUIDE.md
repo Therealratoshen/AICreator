@@ -6,6 +6,8 @@ justnewme.com connects brands and creators for TikTok campaigns. This public rep
 
 A brand asks for a campaign. Three agents propose a strategy, write briefs, and review the result. Code then checks that the plan has the required fields and that its numbers come from supplied data. A creator-side agent can explain a creator's own metrics or draft a caption based on previous captions. The creator flow is in source and tests; the web screen currently shows the brand flow.
 
+The similarly named AI creator declaration in the main product is separate: it lets a creator describe AI-assisted content or a virtual persona on their profile. This repository demonstrates an assistance agent, not that profile declaration, its discovery filter, or content verification.
+
 **Key technical choice:** a fluent model answer is not treated as evidence. A plan is returned only after deterministic checks accept it. If the retry budget is exhausted, the run returns no plan.
 
 The configured live model is **Meta's Muse Spark Open** (`meta-models/muse-spark-open`). The included live adapter uses Baseten's Model APIs, but Baseten is **optional for the local demo and tests**: without `BASETEN_API_KEY`, the repo uses a labelled scripted model. The same application validators run in both modes. The scripted mode verifies the workflow and rejection handling, not the quality of a live Muse Spark Open response.
@@ -16,7 +18,7 @@ The configured live model is **Meta's Muse Spark Open** (`meta-models/muse-spark
 2. Run `npm run demo:agents`. Follow the planner → writer → reviewer transcript and the reasons for any rejected output. Without `BASETEN_API_KEY`, this uses a scripted model, clearly labelled as such.
 3. Run `npm start`, then open `http://127.0.0.1:3000`. Submit a brief for a Monday and follow the progress stream to the final plan or failure. Runs live only in this process's memory and disappear on restart.
 4. Inspect `src/agent/claims.ts` and `src/agent/no-fakes.ts`. They check numerical claims in prose and cited metric values against the rows supplied to the run.
-5. Inspect `src/agent/creator-agent.ts` and `scripts/test-creator.ts` for the separate creator explanation and caption path. There is no creator web screen in this demo.
+5. Run `npm run test:creator`, then inspect `src/agent/creator-agent.ts` and `scripts/test-creator.ts` for the separate creator explanation, caption, and scripted voice paths. There is no creator web screen in this demo.
 
 The [step-by-step image](images/ai-creator-step-by-step.svg) shows the brand demo. The [technical note](TECHNIQUE.md) gives the full validation rules and examples.
 
