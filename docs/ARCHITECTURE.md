@@ -5,6 +5,9 @@ demo uses synthetic rows and has no live social-platform connection.
 [justnewme.com](https://justnewme.com) currently supports TikTok as its live
 campaign channel; Instagram support is on the roadmap.
 
+Where the model runs in production — hosted Model API, self-hosted weights, or
+both — is decided in [ADR 001](DECISIONS/001-deployment-shape.md).
+
 ## The pipeline
 
 ```
